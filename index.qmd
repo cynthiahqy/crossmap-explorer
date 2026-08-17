@@ -1,0 +1,47 @@
+---
+title: "crossmap explorer"
+---
+
+## What this is
+
+A demo of the exploratory power of **crossmaps**
+([xmap](https://github.com/cynthiahqy/xmap) R package;
+[Huang 2024, arXiv:2406.14163](https://doi.org/10.48550/arXiv.2406.14163)),
+using INDSTAT Rev.3's `isiccomb` combination-code splitting as a running
+case study. See `CLAUDE.md` for the full architecture writeup.
+
+- [Coverage](01-coverage-tiles.qmd) -- which country-years rely on a
+  split at all, and how much
+- [Explorer](02-crossmap-explorer.qmd) -- zoom into one country-year's
+  `isiccomb -> isic -> isic.3` crossmap as a node-link diagram
+
+## Component (d): whole-classification overview -- blocked
+
+This page is meant to hold the **composed, whole-classification**
+`isiccomb -> isic.3` view: one graph (not per country-year) showing every
+place in the classification where a real one-to-many split or many-to-one
+aggregation happens, with the pass-through-unchanged majority collapsed
+out of view.
+
+This is intentionally not built yet. It depends on
+[`xmap::compose_xmap()`](https://github.com/cynthiahqy/xmap/issues/29)
+(open, in progress) -- which chains `isiccomb -> isic` and `isic -> isic.3`
+into a single composed crossmap via matrix-multiplication-style weight
+composition, rather than materialising the intermediate `isic`-level
+values at all. That composed crossmap *is* the input this page needs;
+building a hand-rolled substitute here would just be reimplementing that
+function early and would need throwing away once it ships.
+
+**When `compose_xmap()` lands**: add a target to `_targets.R`
+
+```r
+tar_target(
+  composed_isiccomb_isic3,
+  compose_xmap(links_isiccomb_isic, links_isic_isic3)
+)
+```
+
+and build this page against `composed_isiccomb_isic3` directly -- at that
+point the "bundle one-to-one edges, show only many-to-one components"
+reduction becomes a filter on the composed crossmap's weights/degrees,
+not a graph algorithm to design from scratch.

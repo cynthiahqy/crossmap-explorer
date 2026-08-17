@@ -1,0 +1,62 @@
+---
+title: "coverage: which country-years rely on a split?"
+execute:
+  warning: false
+  cache: true
+---
+
+## Motivation
+
+Two views of the same underlying fact, at different resolutions. (b) is a
+strict coarsening of (a): `any_split == (frac_split > 0)`. Read them as a
+pair -- (b) for "where does this even come up," (a) for "how much does it
+matter there."
+
+## Setup
+
+```{r}
+library(tidyverse)
+library(targets)
+```
+
+```{r}
+tile_any_split <- tar_read(tile_any_split)
+tile_frac_split <- tar_read(tile_frac_split)
+ctr_codes <- tar_read(ctr_codes)
+```
+
+## (b) Binary: does this country-year have any isiccomb split at all?
+
+```{r}
+tile_any_split |>
+  left_join(ctr_codes, by = c("country" = "code")) |>
+  ggplot(aes(x = as.factor(year), y = country, fill = any_split)) +
+  geom_tile(color = "black") +
+  scale_x_discrete(labels = ~ str_sub(.x, -2)) +
+  scale_fill_manual(values = c("TRUE" = "#ef8a62", "FALSE" = "#67a9cf")) +
+  theme_minimal() +
+  theme(legend.position = "bottom", axis.text.y = element_blank()) +
+  labs(
+    x = "Year", y = "Country", fill = "Any split?",
+    title = "Countries reporting isiccomb combination codes",
+    subtitle = "INDSTAT 4 REV. 3 Output data"
+  )
+```
+
+## (a) Continuous: what fraction of reported isic values came from a split?
+
+```{r}
+tile_frac_split |>
+  left_join(ctr_codes, by = c("country" = "code")) |>
+  ggplot(aes(x = as.factor(year), y = country, fill = frac_split)) +
+  geom_tile(color = "black") +
+  scale_x_discrete(labels = ~ str_sub(.x, -2)) +
+  scale_fill_distiller(palette = "Blues", direction = 1) +
+  theme_minimal() +
+  theme(legend.position = "bottom", axis.text.y = element_blank()) +
+  labs(
+    x = "Year", y = "Country", fill = "Fraction split",
+    title = "Share of isic values derived from an isiccomb split",
+    subtitle = "INDSTAT 4 REV. 3 Output data"
+  )
+```

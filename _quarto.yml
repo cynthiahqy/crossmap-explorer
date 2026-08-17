@@ -1,0 +1,24 @@
+project:
+  type: website
+  render:
+    - "*.qmd"
+
+website:
+  title: "crossmap explorer"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Overview
+      - href: 01-coverage-tiles.qmd
+        text: Coverage
+      - href: 02-crossmap-explorer.qmd
+        text: Explorer
+      - href: 03-country-variants.qmd
+        text: Country variants
+  sidebar:
+    - contents: auto
+
+format:
+  html:
+    theme: cosmo
+    toc: true
