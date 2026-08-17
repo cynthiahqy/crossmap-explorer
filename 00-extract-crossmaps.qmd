@@ -151,6 +151,41 @@ comb_group_span <- combo_edges |>
   mutate(crosses_isic3 = n_isic3 > 1)
 ```
 
+Is boundary-crossing a property of the `isiccomb` *code* itself (a fixed
+classification artefact, true wherever the code is reported) or of the
+reporting context (varies by which country/year uses it)? Pooling across
+*all* country-years and looking at each code's membership structurally
+answers this directly:
+
+```{r}
+comb_code_span <- combo_edges |>
+  distinct(isiccomb, isic, isic3) |>
+  group_by(isiccomb) |>
+  summarise(
+    n_isic3 = n_distinct(isic3),
+    isic3_members = paste(sort(unique(isic3)), collapse = ", "),
+    .groups = "drop"
+  ) |>
+  mutate(crosses_isic3 = n_isic3 > 1) |>
+  arrange(desc(n_isic3))
+
+comb_code_span
+```
+
+It's overwhelmingly a code property, not a reporting-context one: of
+306 distinct `isiccomb` codes, 179 (58%) always cross wherever they're
+reported, and boundary-crossing components make up 86% of all
+`(country, year, isiccomb)` groups. Some codes are extreme --
+`281I` spans 25 different `isic.3` parents every time it appears:
+
+```{r}
+comb_code_span |>
+  summarise(n_codes = n(), n_codes_crossing = sum(crosses_isic3)) |>
+  mutate(pct_codes_crossing = 100 * n_codes_crossing / n_codes)
+
+comb_code_span |> filter(isiccomb == "281I")
+```
+
 Composing the split with the deterministic `isic -> isic.3` aggregation
 can do one of two things to a combo code's children: **reconverge**
 (every child lands back in the same `isic.3` parent -- the `1/n` split
@@ -243,6 +278,7 @@ crossmap_collection <- list(
   tile_frac_split_crossing = tile_frac_split_crossing,
   combo_edges = combo_edges,
   comb_group_span = comb_group_span,
+  comb_code_span = comb_code_span,
   ctr_year_signature = ctr_year_signature,
   max_isic3_indegree = max_isic3_indegree
 )
