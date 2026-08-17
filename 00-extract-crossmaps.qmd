@@ -110,8 +110,10 @@ links_isic_isic3 <- links_isiccomb_isic |>
   mutate(isic3 = str_sub(isic, 1, 3), weight = 1)
 ```
 
-Coverage tiles -- does a country-year have any split at all, and what
-fraction of `isic` values were touched by one:
+**Stage-1 coverage tiles** -- these only look at the split
+(`isiccomb -> isic`) in isolation: does a country-year have any split at
+all, and what fraction of `isic` values were touched by one. Neither
+knows `isic.3` exists yet:
 
 ```{r}
 tile_any_split <- links_isiccomb_isic |>
@@ -147,6 +149,51 @@ comb_group_span <- combo_edges |>
   group_by(country, year, isiccomb) |>
   summarise(n_isic3 = n_distinct(isic3), .groups = "drop") |>
   mutate(crosses_isic3 = n_isic3 > 1)
+```
+
+Composing the split with the deterministic `isic -> isic.3` aggregation
+can do one of two things to a combo code's children: **reconverge**
+(every child lands back in the same `isic.3` parent -- the `1/n` split
+weights cancel out exactly on re-aggregation, so the `isic.3`-level
+figure is mathematically exact regardless of the split), or **cross**
+(children land in *different* `isic.3` parents -- now the even-split
+assumption directly determines how much value each parent receives, with
+no reconvergence to cancel it out). Only crossing components carry real,
+propagated allocation uncertainty past the split step; reconverging ones
+are imputed at the 4-digit level but exact at 3-digit and coarser. This
+is exactly what the node-link diagrams in
+[Explorer](02-crossmap-explorer.qmd)/[Country variants](03-country-variants.qmd)
+show per component (dashed split edges into a reconvergent or diverging
+fan); `crosses_isic3` above is that same distinction at the
+per-`(country, year, isiccomb)` grain.
+
+**Stage-1+2 coverage tile**: `frac_split_crossing` is the same
+denominator as `frac_split` above (fraction of a country-year's `isic`
+values), restricted to values whose combo group crosses an `isic.3`
+boundary -- i.e. a decomposition, `frac_split = frac_split_reconverging +
+frac_split_crossing`, isolating the fraction of "touched by imputation"
+that's actually consequential once you account for the second stage:
+
+```{r}
+crossing_isic_rows <- combo_edges |>
+  distinct(country, year, isiccomb, isic) |>
+  inner_join(
+    comb_group_span |> filter(crosses_isic3) |> select(country, year, isiccomb),
+    by = c("country", "year", "isiccomb")
+  )
+
+tile_frac_split_crossing <- tile_frac_split |>
+  select(country, year, n_isic) |>
+  left_join(
+    crossing_isic_rows |> count(country, year, name = "n_crossing"),
+    by = c("country", "year")
+  ) |>
+  mutate(
+    n_crossing = replace_na(n_crossing, 0),
+    frac_split_crossing = n_crossing / n_isic
+  )
+
+tile_frac_split_crossing
 ```
 
 Exact per-`(country, year)` crossmap signature -- sorted, concatenated
@@ -193,6 +240,7 @@ crossmap_collection <- list(
   diagnoses_isiccomb_isic = diagnoses_isiccomb_isic,
   tile_any_split = tile_any_split,
   tile_frac_split = tile_frac_split,
+  tile_frac_split_crossing = tile_frac_split_crossing,
   combo_edges = combo_edges,
   comb_group_span = comb_group_span,
   ctr_year_signature = ctr_year_signature,

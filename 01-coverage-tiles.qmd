@@ -7,10 +7,25 @@ execute:
 
 ## Motivation
 
-Two views of the same underlying fact, at different resolutions. (b) is a
-strict coarsening of (a): `any_split == (frac_split > 0)`. Read them as a
-pair -- (b) for "where does this even come up," (a) for "how much does it
-matter there."
+Two different questions, at two different stages of the transformation:
+
+- **Stage 1** (below): was this `isic` value touched by an `isiccomb`
+  split *at all*? This only looks at `isiccomb -> isic` in isolation --
+  it has no notion of `isic.3` and can't distinguish a split that's
+  harmless from one that isn't.
+- **Stage 1+2** (further below): composing the split with the
+  deterministic `isic -> isic.3` aggregation, does the combined
+  transformation actually cross an `isic.3` boundary? A split whose
+  children all reconverge into the same `isic.3` parent is imputed at
+  the 4-digit level but **exact** at 3-digit and coarser (the `1/n`
+  weights cancel out on re-aggregation); a split whose children land in
+  *different* `isic.3` parents carries real, propagated allocation
+  uncertainty. Only the second kind should really count as "consequential"
+  imputation exposure. This is the same distinction the node-link
+  diagrams in [Explorer](02-crossmap-explorer.qmd)/
+  [Country variants](03-country-variants.qmd) show per component (a
+  reconvergent vs. diverging fan of dashed split edges); this page shows
+  its coverage-level rollup.
 
 ## Setup
 
@@ -27,10 +42,19 @@ library(here)
 crossmap_collection <- readRDS(here("data", "interim", "crossmap_collection.rds"))
 tile_any_split <- crossmap_collection$tile_any_split
 tile_frac_split <- crossmap_collection$tile_frac_split
+tile_frac_split_crossing <- crossmap_collection$tile_frac_split_crossing
 ctr_codes <- crossmap_collection$ctr_codes
 ```
 
-## (b) Binary: does this country-year have any isiccomb split at all?
+## Stage 1: split coverage (isiccomb -> isic only)
+
+Two views of the same underlying fact, at different resolutions: the
+binary tile is a strict coarsening of the continuous one
+(`any_split == (frac_split > 0)`) -- read them as a pair, binary for
+"where does this even come up," continuous for "how much does it matter
+there."
+
+### Binary: does this country-year have any isiccomb split at all?
 
 ```{r}
 tile_any_split |>
@@ -44,11 +68,11 @@ tile_any_split |>
   labs(
     x = "Year", y = "Country", fill = "Any split?",
     title = "Countries reporting isiccomb combination codes",
-    subtitle = "INDSTAT 4 REV. 3 Output data"
+    subtitle = "INDSTAT 4 REV. 3 Output data -- stage 1 only"
   )
 ```
 
-## (a) Continuous: what fraction of reported isic values came from a split?
+### Continuous: what fraction of reported isic values came from a split?
 
 ```{r}
 tile_frac_split |>
@@ -62,6 +86,52 @@ tile_frac_split |>
   labs(
     x = "Year", y = "Country", fill = "Fraction split",
     title = "Share of isic values derived from an isiccomb split",
-    subtitle = "INDSTAT 4 REV. 3 Output data"
+    subtitle = "INDSTAT 4 REV. 3 Output data -- stage 1 only"
+  )
+```
+
+## Stage 1+2: does the transformation actually cross an isic.3 boundary?
+
+`frac_split_crossing` shares `frac_split`'s denominator (fraction of a
+country-year's `isic` values) but restricts the numerator to values
+whose combo group *crosses* an `isic.3` boundary -- i.e. it's the
+"consequential" subset of stage 1's coverage, once the second stage is
+accounted for: `frac_split = frac_split_reconverging + frac_split_crossing`.
+
+```{r}
+tile_frac_split_crossing |>
+  left_join(ctr_codes, by = c("country" = "code")) |>
+  ggplot(aes(x = as.factor(year), y = country, fill = frac_split_crossing)) +
+  geom_tile(color = "black") +
+  scale_x_discrete(labels = ~ str_sub(.x, -2)) +
+  scale_fill_distiller(palette = "Oranges", direction = 1) +
+  theme_minimal() +
+  theme(legend.position = "bottom", axis.text.y = element_blank()) +
+  labs(
+    x = "Year", y = "Country", fill = "Fraction crossing",
+    title = "Share of isic values with real, propagated allocation uncertainty",
+    subtitle = "INDSTAT 4 REV. 3 Output data -- stage 1+2 composed"
+  )
+```
+
+How much of stage 1's coverage is actually consequential, in aggregate
+across the whole dataset:
+
+```{r}
+overall <- tile_frac_split |>
+  left_join(tile_frac_split_crossing |> select(country, year, frac_split_crossing),
+    by = c("country", "year")
+  ) |>
+  summarise(
+    total_isic = sum(n_isic),
+    total_split = sum(n_split),
+    total_crossing = sum(round(frac_split_crossing * n_isic)),
+  )
+
+overall |>
+  mutate(
+    pct_of_all_isic_split = 100 * total_split / total_isic,
+    pct_of_all_isic_crossing = 100 * total_crossing / total_isic,
+    pct_of_split_that_crosses = 100 * total_crossing / total_split
   )
 ```

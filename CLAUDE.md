@@ -58,7 +58,7 @@ build output.
 
 ## Status
 
-Scaffolded and working end-to-end for components (a)/(b)/(c)/(c'). Component
+Scaffolded and working end-to-end for components (a)/(a2)/(b)/(c)/(c'). Component
 (d) is a placeholder page (`index.qmd`) -- **blocked on
 `xmap::compose_xmap()`** ([xmap#29](https://github.com/cynthiahqy/xmap/issues/29),
 open/in progress, actively being designed by the package author). Do not
@@ -171,6 +171,28 @@ ported directly from the vignette's `group_summary`/`any_isiccomb`
 pattern. Presented above (a) on the same page since it's a strict
 coarsening of it (`any_split == (frac_split > 0)`) -- read the pair
 together.
+
+Both (a) and (b) are **stage-1-only**: they know nothing about `isic.3`.
+
+### (a2) Tile: fraction of split coverage that's actually consequential -- done
+
+`01-coverage-tiles.qmd`, "Stage 1+2" section.
+`crossmap_collection$tile_frac_split_crossing` -- emerged from noticing
+that some combo components split into multiple `isic` children that all
+*reconverge* into the same `isic.3` parent (not a graph cycle -- a
+reconvergent diamond in the DAG), which makes the split imputed at the
+4-digit level but mathematically **exact** at 3-digit and coarser, since
+the `1/n` weights cancel out on re-aggregation. Only components whose
+children *cross* into different `isic.3` parents carry real, propagated
+allocation uncertainty (the majority: 86.1% of combo components / 89.0%
+of split-touched `isic` rows, computed in `00-extract-crossmaps.qmd`).
+`frac_split_crossing` shares `frac_split`'s denominator so it reads as a
+direct decomposition: `frac_split = frac_split_reconverging +
+frac_split_crossing`. This is the coverage-level rollup of exactly what
+the node-link diagrams in (c)/(c') show per component (a reconvergent vs.
+diverging fan of dashed split edges) -- (a2) answers "how much of this
+country-year's data" where (c)/(c') answer "which specific codes, and
+what does the structure look like."
 
 ### (c) Node-link diagram: per-country-year `isiccomb` split + `isic.3` aggregation -- done
 
