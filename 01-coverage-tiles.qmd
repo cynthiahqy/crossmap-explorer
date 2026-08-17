@@ -157,3 +157,75 @@ overall |>
     pct_of_split_that_crosses = 100 * total_crossing / total_split
   )
 ```
+
+## Which countries does frac_split overstate the most?
+
+Aggregating (all years pooled, volume-weighted -- same approach as
+`country_order` above) down to one row per country makes it possible to
+ask directly: for which reporters is stage-1 `frac_split` mostly noise
+(reconvergent diamonds), and for which is it mostly signal (genuine
+crossing)? Restricted to countries with at least 5 split rows pooled
+across all their years, so a single small sample can't produce a
+misleadingly clean 0% or 100%.
+
+```{r}
+country_split_summary <- tile_frac_split |>
+  left_join(tile_frac_split_crossing |> select(country, year, n_crossing),
+    by = c("country", "year")
+  ) |>
+  left_join(ctr_codes, by = c("country" = "code")) |>
+  group_by(country, name) |>
+  summarise(
+    n_years = n(),
+    total_split = sum(n_split),
+    total_crossing = sum(n_crossing),
+    .groups = "drop"
+  ) |>
+  mutate(
+    total_reconverging = total_split - total_crossing,
+    pct_split_reconverging = 100 * total_reconverging / total_split
+  ) |>
+  filter(total_split >= 5)
+```
+
+Ranked by **absolute overstatement**: how much stage-1 coverage this
+country would report vs. how much of that is actually consequential
+(largest gap first -- i.e. the countries where looking only at the
+first tile above would mislead you the most):
+
+```{r}
+country_split_summary |>
+  left_join(
+    tile_frac_split |> group_by(country) |> summarise(total_isic = sum(n_isic), .groups = "drop"),
+    by = "country"
+  ) |>
+  mutate(
+    frac_split = total_split / total_isic,
+    frac_crossing = total_crossing / total_isic,
+    gap = frac_split - frac_crossing
+  ) |>
+  arrange(desc(gap)) |>
+  transmute(
+    country, name, n_years, total_split, total_reconverging,
+    pct_split_reconverging = round(pct_split_reconverging, 1),
+    frac_split = round(frac_split, 3),
+    frac_crossing = round(frac_crossing, 3),
+    gap = round(gap, 3)
+  ) |>
+  head(15) |>
+  knitr::kable()
+```
+
+Ranked by **share of splitting that's reconvergent**, i.e. "lots of
+reconvergent diamonds" directly -- countries at 100% have *zero* real
+crossing exposure despite a non-trivial `frac_split`:
+
+```{r}
+country_split_summary |>
+  arrange(desc(pct_split_reconverging)) |>
+  transmute(country, name, n_years, total_split, total_reconverging,
+    pct_split_reconverging = round(pct_split_reconverging, 1)
+  ) |>
+  head(15) |>
+  knitr::kable()
+```
