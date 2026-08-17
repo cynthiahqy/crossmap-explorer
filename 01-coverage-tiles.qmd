@@ -46,6 +46,25 @@ tile_frac_split_crossing <- crossmap_collection$tile_frac_split_crossing
 ctr_codes <- crossmap_collection$ctr_codes
 ```
 
+All three tiles below share one country ordering -- by each country's
+*overall* (all-years-pooled) fraction of `isic` values in a crossing
+component, weighted by volume (`sum(n_crossing) / sum(n_isic)`, not a
+plain per-year average, so a country's one thin reporting year can't
+skew its rank) -- rather than each plot re-sorting on its own metric.
+That keeps a given row meaning "this country" consistently across all
+three figures, so you can read the same row down the page and see
+stage-1 coverage vs. stage-1+2 consequential coverage for the same
+country side by side.
+
+```{r}
+country_order <- tile_frac_split_crossing |>
+  group_by(country) |>
+  summarise(total_isic = sum(n_isic), total_crossing = sum(n_crossing), .groups = "drop") |>
+  mutate(agg_frac_crossing = total_crossing / total_isic) |>
+  arrange(agg_frac_crossing) |>
+  pull(country)
+```
+
 ## Stage 1: split coverage (isiccomb -> isic only)
 
 Two views of the same underlying fact, at different resolutions: the
@@ -59,6 +78,7 @@ there."
 ```{r}
 tile_any_split |>
   left_join(ctr_codes, by = c("country" = "code")) |>
+  mutate(country = factor(country, levels = country_order)) |>
   ggplot(aes(x = as.factor(year), y = country, fill = any_split)) +
   geom_tile(color = "black") +
   scale_x_discrete(labels = ~ str_sub(.x, -2)) +
@@ -77,6 +97,7 @@ tile_any_split |>
 ```{r}
 tile_frac_split |>
   left_join(ctr_codes, by = c("country" = "code")) |>
+  mutate(country = factor(country, levels = country_order)) |>
   ggplot(aes(x = as.factor(year), y = country, fill = frac_split)) +
   geom_tile(color = "black") +
   scale_x_discrete(labels = ~ str_sub(.x, -2)) +
@@ -101,6 +122,7 @@ accounted for: `frac_split = frac_split_reconverging + frac_split_crossing`.
 ```{r}
 tile_frac_split_crossing |>
   left_join(ctr_codes, by = c("country" = "code")) |>
+  mutate(country = factor(country, levels = country_order)) |>
   ggplot(aes(x = as.factor(year), y = country, fill = frac_split_crossing)) +
   geom_tile(color = "black") +
   scale_x_discrete(labels = ~ str_sub(.x, -2)) +
