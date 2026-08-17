@@ -44,6 +44,7 @@ source(here("R", "prep.R")) # collapse_years()
 ```{r}
 combo_edges <- tar_read(combo_edges)
 ctr_year_signature <- tar_read(ctr_year_signature)
+max_isic3_indegree <- tar_read(max_isic3_indegree)
 ```
 
 ## Prep data for the diagram
@@ -94,6 +95,7 @@ crossmap_group_list |> select(-signature)
 #| cache: false
 ojs_define(crossmap_group_list = crossmap_group_list)
 ojs_define(combo_edges = combo_edges)
+ojs_define(max_isic3_indegree = max_isic3_indegree)
 ```
 
 ## Node-link diagram
@@ -156,8 +158,12 @@ function buildCrossmapNodeLink(edgesForCode) {
   const pos1 = new Map(col1.map((d, i) => [d, y1[i]]));
   const pos2 = new Map(col2.map((d, i) => [d, y2[i]]));
 
-  const maxIn2 = d3.max(col2, d => inDeg2.get(d)) ?? 1;
-  const shade = d3.scaleSequential(d3.interpolateBlues).domain([0, maxIn2]);
+  // fixed domain (not renormalized per component) -- otherwise a plain
+  // 1-to-1 target in a component with no aggregation would render at the
+  // same "darkest = most synthetic" color as a genuinely heavily-aggregated
+  // target in a different component, since each component's own max would
+  // get mapped to full-dark. max_isic3_indegree is the dataset-wide max.
+  const shade = d3.scaleSequential(d3.interpolateBlues).domain([0, max_isic3_indegree]);
 
   const svg = d3.create("svg")
     .attr("viewBox", [0, 0, width, height])

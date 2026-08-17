@@ -235,6 +235,24 @@ level.
   `Inputs.select(new Map(data.map(d => [d.label, d.value])), {sort: false})`.
 - **Guard any height/size calc derived from `d3.max()`/`d3.rollups()`
   against an empty result** (`?? 1` fallback).
+- **Never normalize a color scale's domain locally per small-multiple.**
+  The node-link diagrams originally computed `shade`'s domain as
+  `[0, max in-degree within this one component]` -- which meant a plain
+  1-to-1 target in a component with no aggregation at all got the exact
+  same "darkest = most synthetic" color as a genuinely heavily-aggregated
+  target in a different component, since each component's own local max
+  gets mapped to full-dark regardless of its absolute value. Confirmed on
+  real data: Albania 1998's `3000C` component (7 targets, all in-degree 1,
+  zero aggregation) rendered identically dark-blue to `1511A`'s
+  genuinely-aggregated in-degree-2 target. Fixed by computing
+  `max_isic3_indegree` once, dataset-wide, as a `_targets.R` target
+  (`combo_edges |> group_by(country, year, isiccomb, isic3) |>
+  summarise(n_isic = n_distinct(isic)) |> pull(n_isic) |> max()` -- value
+  is `6`), `ojs_define()`-ing it into both `02` and `03` as a fixed
+  `shade` domain. Any encoding meant to be visually comparable *across*
+  small multiples needs a domain computed over the whole comparison set,
+  not per-facet -- this applies equally to any future component that
+  shades/sizes nodes by degree.
 - **De-duplicate before visualizing per-country-year.** 717 raw
   country-years collapse to 218 distinct structural crossmap signatures
   in the real INDSTAT data -- always compute the collapse

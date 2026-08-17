@@ -96,6 +96,22 @@ list(
   tar_target(
     name = ctr_year_signature,
     command = compute_ctr_year_signature(combo_edges, comb_group_span, ctr_codes)
+  ),
+
+  ## global max isic.3 in-degree (max # of distinct isic children feeding
+  ## into a single isic.3 parent, over ALL country-year-isiccomb components
+  ## in the dataset) -- fixed reference point for the node-link diagrams'
+  ## target-node color scale, so "how dark" means the same thing in every
+  ## diagram on the site instead of being renormalized per diagram (which
+  ## made an unaggregated isic3 node in a low-max component render exactly
+  ## as dark as a genuinely-aggregated node in a high-max component)
+  tar_target(
+    name = max_isic3_indegree,
+    command = combo_edges |>
+      dplyr::group_by(country, year, isiccomb, isic3) |>
+      dplyr::summarise(n_isic = dplyr::n_distinct(isic), .groups = "drop") |>
+      dplyr::pull(n_isic) |>
+      max()
   )
 
   ## -- component (d): composed isiccomb -> isic.3 crossmap --
