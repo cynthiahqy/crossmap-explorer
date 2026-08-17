@@ -4,16 +4,28 @@ title: "crossmap explorer"
 
 ## What this is
 
-A demo of the exploratory power of **crossmaps**
-([xmap](https://github.com/cynthiahqy/xmap) R package;
-[Huang 2024, arXiv:2406.14163](https://doi.org/10.48550/arXiv.2406.14163)),
-using INDSTAT Rev.3's `isiccomb` combination-code splitting as a running
-case study. See `CLAUDE.md` for the full architecture writeup.
+A companion to [`xmap`](https://github.com/cynthiahqy/xmap)'s vignettes
+and to the crossmaps definition paper
+([Huang 2024, arXiv:2406.14163](https://doi.org/10.48550/arXiv.2406.14163)),
+extending the "exploratory power of a crossmap collection" idea onto the
+full, real INDSTAT Rev.3 extract -- using `isiccomb` combination-code
+splitting as a running case study. See `CLAUDE.md` for the full
+architecture writeup.
 
+This site is deliberately a linear set of Quarto notebooks, not a data
+pipeline with a build tool behind it: [Extraction](00-extract-crossmaps.qmd)
+runs the vignette's naive-weight extraction technique once and saves a
+single `crossmap_collection.rds` artifact; every other page just reads
+that file.
+
+- [Extraction](00-extract-crossmaps.qmd) -- the naive-weight ("carbon
+  paper") extraction + per-country-year validation, on real data
 - [Coverage](01-coverage-tiles.qmd) -- which country-years rely on a
   split at all, and how much
 - [Explorer](02-crossmap-explorer.qmd) -- zoom into one country-year's
   `isiccomb -> isic -> isic.3` crossmap as a node-link diagram
+- [Country variants](03-country-variants.qmd) -- all the structurally
+  distinct crossmaps a single country used over time
 
 ## Component (d): whole-classification overview -- blocked
 
@@ -32,16 +44,16 @@ values at all. That composed crossmap *is* the input this page needs;
 building a hand-rolled substitute here would just be reimplementing that
 function early and would need throwing away once it ships.
 
-**When `compose_xmap()` lands**: add a target to `_targets.R`
+**When `compose_xmap()` lands**: add a step to
+[Extraction](00-extract-crossmaps.qmd)'s "Derive the collection's summary
+artifacts" section
 
 ```r
-tar_target(
-  composed_isiccomb_isic3,
-  compose_xmap(links_isiccomb_isic, links_isic_isic3)
-)
+composed_isiccomb_isic3 <- compose_xmap(links_isiccomb_isic, links_isic_isic3)
 ```
 
-and build this page against `composed_isiccomb_isic3` directly -- at that
+save it into `crossmap_collection`, and build this page against it
+directly -- at that
 point the "bundle one-to-one edges, show only many-to-one components"
 reduction becomes a filter on the composed crossmap's weights/degrees,
 not a graph algorithm to design from scratch.

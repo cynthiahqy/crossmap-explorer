@@ -17,30 +17,72 @@ instead of ad hoc `dplyr` scripts, on the **full real INDSTAT extract**
 see `data/raw/`), so the coverage tiles have real signal in them.
 
 **Audience**: someone who has just encountered "crossmaps" via a talk, the
-paper, or the package README, and wants to see -- concretely, on real data --
-what questions a crossmap collection lets you ask that raw before/after data
-can't answer.
+paper, the package's own vignettes, or the crossmaps definition paper
+revision, and wants to see -- concretely, on real data -- what questions a
+crossmap collection lets you ask that raw before/after data can't answer.
+This is explicitly framed as an **extension of `xmap`'s
+`extracting-crossmaps-from-scripts.Rmd` vignette and a supporting-materials
+site for the paper**, not a general-purpose analytics dashboard -- see
+"No build tool, on purpose" below for what that implies architecturally.
+
+## No build tool, on purpose
+
+There is **no `targets`/`_targets.R`, no dependency-graph build system**.
+This was a deliberate choice, not a missing feature: a site meant to read
+as a companion to a vignette and a paper should read like a linear,
+inspectable notebook -- the same way the vignette itself is one `.Rmd`
+you read top to bottom -- not like a general data pipeline with its own
+orchestration layer. `targets` was scaffolded here initially and then
+deliberately removed for this reason.
+
+Instead: [`00-extract-crossmaps.qmd`](00-extract-crossmaps.qmd) is a
+single, self-contained extraction notebook (real INDSTAT data pushed
+through the same naive-weight/"carbon paper" technique as the vignette's
+Case 2, then validated per-country-year with
+`xmap::diagnose_as_xmap_tbl()`), ending by saving one artifact:
+`data/interim/crossmap_collection.rds` (a named list -- see that page's
+final chunk for the full contents). **Every other page just
+`readRDS()`s that file** -- no re-derivation, no hidden dependency graph
+to reason about. Files are numbered (`00-`, `01-`, ...) so a whole-project
+`quarto render` naturally processes extraction first; confirmed this
+works via a full clean `quarto render` after removing `_targets.R`
+(deleted `_site/`, `.quarto/`, all `*_cache/`/`*_files/`, and the old
+`_targets/` store first) -- all 5 pages render in the right order with
+zero errors.
+
+`data/interim/crossmap_collection.rds` **is committed to the repo**
+(unlike a `targets` cache, which would be gitignored) -- it's meant to be
+a citable, versioned artifact in the same spirit as the vignette's own
+bundled datasets (`xmap::indstat`, `xmap::timor_occupn`), not disposable
+build output.
 
 ## Status
 
-Scaffolded and working end-to-end for components (a)/(b)/(c). Component (d)
-is a placeholder page (`index.qmd`) -- **blocked on
+Scaffolded and working end-to-end for components (a)/(b)/(c)/(c'). Component
+(d) is a placeholder page (`index.qmd`) -- **blocked on
 `xmap::compose_xmap()`** ([xmap#29](https://github.com/cynthiahqy/xmap/issues/29),
 open/in progress, actively being designed by the package author). Do not
 hand-roll a bundling/composition substitute for (d) -- see that section
 below for why, and what to do once the function ships.
 
 ```
-_targets.R          # data pipeline: raw CSV -> naive-weight extraction ->
-                     # xmap validation -> per-component summary targets
+00-extract-crossmaps.qmd    # extraction notebook -- run this first (or
+                             # render the whole project); produces
+                             # data/interim/crossmap_collection.rds, which
+                             # every page below reads via readRDS()
 R/
   load.R            # read_rev3_output(), read_rev3_ctr_codes()
   legacy.R          # split_isiccomb(), subset_34_from_total() -- the
-                     # "opaque legacy script" treated as a black box
+                     # "opaque legacy script" treated as a black box,
+                     # shown inline in 00-extract-crossmaps.qmd via
+                     # #| file: chunks (vignette-style: readers see the
+                     # real code, not a source() call hiding it)
   extract.R         # extract_naive_weights(), diagnose_grouped_xmap()
   prep.R            # collapse_years(), compute_ctr_year_signature() --
-                     # shared by 02 and 03, backed by _targets.R's
-                     # comb_group_span/ctr_year_signature targets
+                     # the latter runs once in 00; collapse_years() is
+                     # re-sourced in 02/03 since it's used interactively
+                     # there too (grouping crossmap_collection's
+                     # ctr_year_signature differently per page)
 index.qmd            # (d) -- placeholder, blocked on xmap#29
 01-coverage-tiles.qmd       # (a) + (b)
 02-crossmap-explorer.qmd    # (c): pick any country-year, deduplicated
@@ -51,16 +93,18 @@ index.qmd            # (d) -- placeholder, blocked on xmap#29
 data/
   raw/REV_3/14-Output.csv                        # real INDSTAT extract (copied)
   external/country_codes/INDSTAT_countries_REV3.csv
-  interim/                                        # targets store lives in _targets/, not here
+  interim/crossmap_collection.rds                 # committed artifact, see above
 ```
 
-Verified this session: `tar_make()` runs clean on the real data (1523/1523
-country-year groups pass `xmap::diagnose_as_xmap_tbl()`); `quarto render`
-produces all three pages with zero pandoc warnings, zero unclosed `<div>`s,
-and correctly-shaped `ojs_define()` payloads (`combo_edges`: 19,185 rows;
-`crossmap_group_list`: 218 deduplicated groups from 717 raw country-years --
-matches `conformr-indstat`'s independently-computed numbers, a good sign the
-port is faithful).
+Verified: a full clean `quarto render` (all 5 pages, extraction first) runs
+with zero errors on the real data -- 1523/1523 country-year groups pass
+`xmap::diagnose_as_xmap_tbl()` inside `00-extract-crossmaps.qmd`, zero
+pandoc warnings, zero unclosed `<div>`s, and correctly-shaped
+`ojs_define()` payloads downstream (`combo_edges`: 19,185 rows;
+`crossmap_group_list`: 218 deduplicated groups from 717 raw country-years;
+`max_isic3_indegree`: 6) -- matches `conformr-indstat`'s
+independently-computed numbers from before this repo existed, a good sign
+the extraction is faithful.
 
 ## Core concept (for anyone touching this repo)
 
@@ -109,33 +153,37 @@ scaffolding, not just a theoretical concern.
 
 ## The four components
 
-Each is its own page; all read from `_targets.R` outputs.
+Each is its own page; all read fields out of
+`readRDS("data/interim/crossmap_collection.rds")`, produced by
+`00-extract-crossmaps.qmd`.
 
 ### (a) Tile: split coverage, count/frac of `isic` targets with an incoming split -- done
 
-`01-coverage-tiles.qmd`, bottom half. `tile_frac_split` target: per
-`(country, year)`, fraction of *reported `isic` target values* touched by a
-split (`weight != 1`), not just whether any split happened -- the continuous
-generalization of (b).
+`01-coverage-tiles.qmd`, bottom half. `crossmap_collection$tile_frac_split`:
+per `(country, year)`, fraction of *reported `isic` target values* touched
+by a split (`weight != 1`), not just whether any split happened -- the
+continuous generalization of (b).
 
 ### (b) Tile: binary, does this country-year have any isiccomb split at all -- done
 
-`01-coverage-tiles.qmd`, top half. `tile_any_split` target, ported directly
-from the vignette's `group_summary`/`any_isiccomb` pattern. Presented above
-(a) on the same page since it's a strict coarsening of it
-(`any_split == (frac_split > 0)`) -- read the pair together.
+`01-coverage-tiles.qmd`, top half. `crossmap_collection$tile_any_split`,
+ported directly from the vignette's `group_summary`/`any_isiccomb`
+pattern. Presented above (a) on the same page since it's a strict
+coarsening of it (`any_split == (frac_split > 0)`) -- read the pair
+together.
 
 ### (c) Node-link diagram: per-country-year `isiccomb` split + `isic.3` aggregation -- done
 
 `02-crossmap-explorer.qmd`, ported from `conformr-indstat`'s
 `01b-crossmap-node-link.qmd` (already validated there: paper-faithful
 encoding, correct OJS data shapes). Repointed at this repo's own
-`combo_edges`/`ctr_year_signature` targets. The identical-crossmap
-de-duplication (`ctr_year_signature`: exact `isiccomb|isic|weight`
-signature per country-year) now lives in `_targets.R` /
-`R/prep.R::compute_ctr_year_signature()`, shared with (c') below --
-`02` only does the *pooled-across-countries* grouping
-(`crossmap_group_list`) on top of it.
+`crossmap_collection$combo_edges`/`$ctr_year_signature`. The
+identical-crossmap de-duplication (`ctr_year_signature`: exact
+`isiccomb|isic|weight` signature per country-year) is computed once in
+`00-extract-crossmaps.qmd` via `R/prep.R::compute_ctr_year_signature()`
+and saved into the collection, shared with (c') below -- `02` only does
+the *pooled-across-countries* grouping (`crossmap_group_list`) on top of
+it, at render time.
 
 ### (c') Country variants: all the crossmaps one country used, over time -- done
 
@@ -173,14 +221,12 @@ re-plumbing once the real function ships with its own validity semantics
 `xmap2` doesn't fully cover `xmap1`'s targets -- a hand-rolled version here
 would not get that for free).
 
-Once `compose_xmap()` ships:
+Once `compose_xmap()` ships, add a step to `00-extract-crossmaps.qmd`'s
+"Derive the collection's summary artifacts" section and save the result
+into `crossmap_collection`:
 
 ```r
-# _targets.R
-tar_target(
-  composed_isiccomb_isic3,
-  compose_xmap(links_isiccomb_isic, links_isic_isic3)
-)
+composed_isiccomb_isic3 <- compose_xmap(links_isiccomb_isic, links_isic_isic3)
 ```
 
 Then `index.qmd` becomes: the composed crossmap's `(from, to, weight)`
@@ -200,7 +246,8 @@ level.
 - **Quarto website**, same as `conformr-indstat` -- proven to support
   everything needed: static ggplot tiles, `{ojs}` cells with `d3`, `ojs_define()`
   bridging R -> JS. Fully static output, no separate JS build step.
-- **`targets`** for the data pipeline.
+- **No pipeline/build tool** -- deliberately just Quarto's own render
+  order over numbered `.qmd` files. See "No build tool, on purpose" above.
 - **`xmap`** (installed via `remotes::install_github("cynthiahqy/xmap")` --
   **not on CRAN**, must be installed from GitHub; add this to any setup
   README/script, `install.packages("xmap")` will fail) for crossmap
@@ -245,7 +292,7 @@ level.
   real data: Albania 1998's `3000C` component (7 targets, all in-degree 1,
   zero aggregation) rendered identically dark-blue to `1511A`'s
   genuinely-aggregated in-degree-2 target. Fixed by computing
-  `max_isic3_indegree` once, dataset-wide, as a `_targets.R` target
+  `max_isic3_indegree` once, dataset-wide, in `00-extract-crossmaps.qmd`
   (`combo_edges |> group_by(country, year, isiccomb, isic3) |>
   summarise(n_isic = n_distinct(isic)) |> pull(n_isic) |> max()` -- value
   is `6`), `ojs_define()`-ing it into both `02` and `03` as a fixed

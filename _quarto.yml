@@ -9,6 +9,8 @@ website:
     left:
       - href: index.qmd
         text: Overview
+      - href: 00-extract-crossmaps.qmd
+        text: Extraction
       - href: 01-coverage-tiles.qmd
         text: Coverage
       - href: 02-crossmap-explorer.qmd

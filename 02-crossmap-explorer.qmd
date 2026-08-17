@@ -34,17 +34,21 @@ crossmap and the source of the second.
 
 ## Setup
 
+Reads the crossmap collection prepared by
+[Extraction](00-extract-crossmaps.qmd) -- render that page first if
+`data/interim/crossmap_collection.rds` is missing or stale.
+
 ```{r}
 library(tidyverse)
 library(here)
-library(targets)
 source(here("R", "prep.R")) # collapse_years()
 ```
 
 ```{r}
-combo_edges <- tar_read(combo_edges)
-ctr_year_signature <- tar_read(ctr_year_signature)
-max_isic3_indegree <- tar_read(max_isic3_indegree)
+crossmap_collection <- readRDS(here("data", "interim", "crossmap_collection.rds"))
+combo_edges <- crossmap_collection$combo_edges
+ctr_year_signature <- crossmap_collection$ctr_year_signature
+max_isic3_indegree <- crossmap_collection$max_isic3_indegree
 ```
 
 ## Prep data for the diagram

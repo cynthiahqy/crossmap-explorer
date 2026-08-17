@@ -5,7 +5,6 @@
 .Rhistory
 .RData
 .Ruserdata
-_targets/
 _site/
 *.knit.md
 *_cache/

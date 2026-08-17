@@ -14,15 +14,20 @@ matter there."
 
 ## Setup
 
+Reads the crossmap collection prepared by
+[Extraction](00-extract-crossmaps.qmd) -- render that page first if
+`data/interim/crossmap_collection.rds` is missing or stale.
+
 ```{r}
 library(tidyverse)
-library(targets)
+library(here)
 ```
 
 ```{r}
-tile_any_split <- tar_read(tile_any_split)
-tile_frac_split <- tar_read(tile_frac_split)
-ctr_codes <- tar_read(ctr_codes)
+crossmap_collection <- readRDS(here("data", "interim", "crossmap_collection.rds"))
+tile_any_split <- crossmap_collection$tile_any_split
+tile_frac_split <- crossmap_collection$tile_frac_split
+ctr_codes <- crossmap_collection$ctr_codes
 ```
 
 ## (b) Binary: does this country-year have any isiccomb split at all?

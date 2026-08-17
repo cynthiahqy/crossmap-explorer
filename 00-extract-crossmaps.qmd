@@ -1,0 +1,203 @@
+---
+title: "extracting the isiccomb -> isic crossmap collection from INDSTAT"
+execute:
+  warning: false
+  cache: true
+---
+
+## Motivation
+
+This page is a companion to
+[`xmap`](https://github.com/cynthiahqy/xmap)'s vignette
+`extracting-crossmaps-from-scripts.Rmd` (specifically Case 2, PR #4) --
+it runs the same "carbon paper" naive-weight extraction technique end to
+end on the **full, real INDSTAT Rev.3 extract** (all reporters and years,
+not the vignette's 5-country masked-sample subset), and saves the result
+as a single artifact the rest of this site reads from.
+
+The technique, restated: rather than trusting or parsing a legacy
+data-cleaning script's logic directly, pass "simplified" (masked) data
+through it and recover the mapping it implies from the output. This works
+even when the real values are sensitive, since only the *structure* of
+the transform -- which source codes map to which targets, at what weight
+-- is being recovered, not the real data.
+
+**Every other page in this site loads `data/interim/crossmap_collection.rds`,
+produced at the end of this page, rather than recomputing any of this.**
+There is no build-system dependency graph (no `targets`/`_targets.R`) --
+this is deliberately a single, linear, readable extraction notebook, in
+keeping with this site's purpose as a companion to the vignette and to
+the crossmaps definition paper, not a general-purpose data pipeline. If
+you change this page's logic, re-render it before the other pages, or
+just `quarto render` the whole project (files are numbered so this one
+sorts and renders first).
+
+## Setup
+
+```{r}
+library(tidyverse)
+library(here)
+library(xmap)
+library(testthat)
+```
+
+## The legacy script
+
+Treated as an opaque black box, exactly as in the vignette -- we recover
+its mapping logic by extraction rather than by reading it:
+
+```{r}
+#| file: R/legacy.R
+#| eval: true
+```
+
+## Read the raw INDSTAT extract
+
+```{r}
+#| file: R/load.R
+#| eval: true
+```
+
+```{r}
+ctr_codes <- read_rev3_ctr_codes(here("data", "external", "country_codes", "INDSTAT_countries_REV3.csv"))
+indstat_rev3 <- read_rev3_output(here("data", "raw", "REV_3", "14-Output.csv"))
+indstat_threefour <- subset_34_from_total(indstat_rev3, total_letter = "D")$threefour
+
+indstat_threefour
+```
+
+## Extract the naive weights
+
+Masking must preserve `NA`s -- an unconditional mask would turn
+originally-missing cells into "recorded" ones, breaking
+`split_isiccomb()`'s own internal invariant check (exactly one recorded
+value per `isiccomb` group). See the comment in `R/extract.R`; this was a
+real bug caught while building this page, not a theoretical concern.
+
+```{r}
+#| file: R/extract.R
+#| eval: true
+```
+
+```{r}
+links_isiccomb_isic <- extract_naive_weights(indstat_threefour)
+
+links_isiccomb_isic
+```
+
+## Validate, per country-year
+
+A crossmap collection is many small crossmaps stacked in one table, so
+validity has to be checked *within* each `(country, year)` group, not
+across the whole table at once:
+
+```{r}
+diagnoses_isiccomb_isic <- diagnose_grouped_xmap(links_isiccomb_isic, isiccomb, isic, weight)
+
+diagnoses_isiccomb_isic |> count(valid)
+```
+
+## Derive the collection's summary artifacts
+
+The deterministic hierarchical map `isic -> isic.3` (weight always `1`;
+kept separate from the split map above so a future
+`xmap::compose_xmap()` -- [xmap#29](https://github.com/cynthiahqy/xmap/issues/29)
+-- can chain the two without this page needing to change):
+
+```{r}
+links_isic_isic3 <- links_isiccomb_isic |>
+  distinct(isic) |>
+  mutate(isic3 = str_sub(isic, 1, 3), weight = 1)
+```
+
+Coverage tiles -- does a country-year have any split at all, and what
+fraction of `isic` values were touched by one:
+
+```{r}
+tile_any_split <- links_isiccomb_isic |>
+  group_by(country, year) |>
+  summarise(any_split = any(weight != 1), .groups = "drop")
+
+tile_frac_split <- links_isiccomb_isic |>
+  group_by(country, year) |>
+  summarise(
+    n_isic = n(),
+    n_split = sum(weight != 1),
+    frac_split = n_split / n_isic,
+    .groups = "drop"
+  )
+```
+
+Structural `(country, year, isiccomb, isic, isic3, weight)` edge table
+for the node-link diagrams:
+
+```{r}
+combo_edges <- links_isiccomb_isic |>
+  filter(split.isiccomb == TRUE) |>
+  transmute(country, year, isiccomb, isic, isic3 = str_sub(isic, 1, 3), weight)
+
+combo_edges
+```
+
+Which `(country, year, isiccomb)` groups cross an `isic.3` boundary
+(span more than one distinct `isic.3` parent):
+
+```{r}
+comb_group_span <- combo_edges |>
+  group_by(country, year, isiccomb) |>
+  summarise(n_isic3 = n_distinct(isic3), .groups = "drop") |>
+  mutate(crosses_isic3 = n_isic3 > 1)
+```
+
+Exact per-`(country, year)` crossmap signature -- sorted, concatenated
+`isiccomb|isic|weight` triples, so identical strings mean identical
+crossmaps -- plus summary stats, used by both explorer pages to
+de-duplicate before visualizing:
+
+```{r}
+#| file: R/prep.R
+#| eval: true
+```
+
+```{r}
+ctr_year_signature <- compute_ctr_year_signature(combo_edges, comb_group_span, ctr_codes)
+
+ctr_year_signature |> select(-signature)
+```
+
+Global max `isic.3` in-degree (max # of distinct `isic` children feeding
+into a single `isic.3` parent, over *all* country-year-`isiccomb`
+components in the dataset) -- a fixed reference point for the node-link
+diagrams' target-node color scale, so "how dark" means the same thing in
+every diagram on the site rather than being renormalized per diagram:
+
+```{r}
+max_isic3_indegree <- combo_edges |>
+  group_by(country, year, isiccomb, isic3) |>
+  summarise(n_isic = n_distinct(isic), .groups = "drop") |>
+  pull(n_isic) |>
+  max()
+
+max_isic3_indegree
+```
+
+## Save the collection
+
+```{r}
+dir.create(here("data", "interim"), showWarnings = FALSE, recursive = TRUE)
+
+crossmap_collection <- list(
+  ctr_codes = ctr_codes,
+  links_isiccomb_isic = links_isiccomb_isic,
+  links_isic_isic3 = links_isic_isic3,
+  diagnoses_isiccomb_isic = diagnoses_isiccomb_isic,
+  tile_any_split = tile_any_split,
+  tile_frac_split = tile_frac_split,
+  combo_edges = combo_edges,
+  comb_group_span = comb_group_span,
+  ctr_year_signature = ctr_year_signature,
+  max_isic3_indegree = max_isic3_indegree
+)
+
+saveRDS(crossmap_collection, here("data", "interim", "crossmap_collection.rds"))
+```
