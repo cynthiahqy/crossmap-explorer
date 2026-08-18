@@ -89,6 +89,9 @@ R/
                      # re-sourced in 02/03 since it's used interactively
                      # there too (grouping crossmap_collection's
                      # ctr_year_signature differently per page)
+js/
+  node-link.js      # shared OJS node-link diagram builders, imported by
+                     # 02/03/04 (see (c')/(d) sections below)
 index.qmd            # landing page, links to every page below
 01-coverage-tiles.qmd       # (a) + (b)
 02-crossmap-explorer.qmd    # (c): pick any country-year, deduplicated
@@ -227,12 +230,22 @@ against a hand-computed check: DEU has exactly 3 distinct variants across
 its 13 years (1991-1994: 17 combo codes; 1999-2005: 1; 2007-2008: 2) --
 the page reproduces this exactly.
 
-The node-link-building OJS code (`buildCrossmapNodeLink`/`evenY`) is
-currently duplicated between `02` and `03` rather than shared -- Quarto
-doesn't have a clean cross-`.qmd` OJS module story without extra
-tooling (a `FileAttachment`-based shared `.js` file would work but adds
-build complexity for two call sites). Worth revisiting if a third
-node-link page shows up.
+The node-link-building OJS code is factored out into `js/node-link.js`, a
+plain ES module imported directly by `02`, `03`, and `04` (`import { ... }
+from "./js/node-link.js"` in each page's OJS setup chunk) -- this is a
+standard JS `import`, not Observable notebook import syntax, and Quarto's
+OJS engine resolves and copies it into `_site/js/` automatically. `d3` is
+passed into the module's functions as an explicit argument rather than
+required inside the module, since each page already does its own `d3 =
+require("d3@7")` and OJS resolves that per-notebook. The module exports
+two builders: `buildCrossmapNodeLink3Col()` (the `isiccomb -> isic ->
+isic.3` diagram used by `02`/`03`, parameterized for `02`'s larger and
+`03`'s more compact sizing) and `buildComposedNodeLink2Col()` (`04`'s
+simplified `isiccomb -> isic.3` diagram, since the `isic` intermediate is
+already composed away there). Verified with a headless Chrome dump-dom
+check on all three pages (real coordinates in the rendered `<path>`/`<svg>`
+elements, no `NaN`, no console errors) since the Chrome extension wasn't
+available this session for a full interactive click-through.
 
 ### (d) Composed overview: full `isiccomb -> isic.3` structure -- done
 
