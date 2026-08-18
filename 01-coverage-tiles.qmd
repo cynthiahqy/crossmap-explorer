@@ -1,5 +1,5 @@
 ---
-title: "coverage: which country-years rely on a split?"
+title: "Split Coverage"
 execute:
   warning: false
   cache: true
@@ -65,7 +65,7 @@ country_order <- tile_frac_split_crossing |>
   pull(country)
 ```
 
-## Stage 1: split coverage (isiccomb -> isic only)
+## Stage 1: Split Coverage (isiccomb -> isic)
 
 Two views of the same underlying fact, at different resolutions: the
 binary tile is a strict coarsening of the continuous one
@@ -73,7 +73,7 @@ binary tile is a strict coarsening of the continuous one
 "where does this even come up," continuous for "how much does it matter
 there."
 
-### Binary: does this country-year have any isiccomb split at all?
+### Any Split?
 
 ```{r}
 tile_any_split |>
@@ -92,7 +92,7 @@ tile_any_split |>
   )
 ```
 
-### Continuous: what fraction of reported isic values came from a split?
+### Fraction Split
 
 ```{r}
 tile_frac_split |>
@@ -111,7 +111,7 @@ tile_frac_split |>
   )
 ```
 
-## Stage 1+2: does the transformation actually cross an isic.3 boundary?
+## Stage 1+2: Crossing isic.3
 
 `frac_split_crossing` shares `frac_split`'s denominator (fraction of a
 country-year's `isic` values) but restricts the numerator to values
@@ -158,7 +158,7 @@ overall |>
   )
 ```
 
-## Which countries does frac_split overstate the most?
+## Biggest Overstatements
 
 Aggregating (all years pooled, volume-weighted -- same approach as
 `country_order` above) down to one row per country makes it possible to

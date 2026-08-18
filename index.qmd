@@ -1,8 +1,8 @@
 ---
-title: "crossmap explorer"
+title: "Crossmap Explorer"
 ---
 
-## What this is
+## What This Is
 
 A companion to [`xmap`](https://github.com/cynthiahqy/xmap)'s vignettes
 and to the crossmaps definition paper

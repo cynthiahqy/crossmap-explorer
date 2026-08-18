@@ -1,5 +1,5 @@
 ---
-title: "composed overview: whole-classification isiccomb -> isic.3 structure"
+title: "Composed Overview"
 execute:
   warning: false
   cache: true
@@ -41,7 +41,7 @@ composed_isiccomb_isic3 <- crossmap_collection$composed_isiccomb_isic3
 ctr_codes <- crossmap_collection$ctr_codes
 ```
 
-## Prep data for the diagram
+## Preparing the Diagram
 
 Every `isiccomb` code turns out to compose the exact same way in every
 country-year that reports it (see [Extraction](00-extract-crossmaps.qmd)),
@@ -120,7 +120,7 @@ ojs_define(composed_crossing_edges = composed_crossing_edges)
 ojs_define(composed_code_coverage = composed_code_coverage)
 ```
 
-## Node-link overview
+## Node-Link Overview
 
 ```{ojs}
 //| label: nodelink-inputs

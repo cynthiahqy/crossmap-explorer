@@ -4,7 +4,7 @@ project:
     - "*.qmd"
 
 website:
-  title: "crossmap explorer"
+  title: "Crossmap Explorer"
   navbar:
     left:
       - href: index.qmd
@@ -16,9 +16,9 @@ website:
       - href: 02-crossmap-explorer.qmd
         text: Explorer
       - href: 03-country-variants.qmd
-        text: Country variants
+        text: Country Variants
       - href: 04-composed-overview.qmd
-        text: Composed overview
+        text: Composed Overview
   sidebar:
     - contents: auto
 

@@ -1,5 +1,5 @@
 ---
-title: "crossmap explorer: isiccomb splits + isic.3 aggregation, per country-year"
+title: "Country-Year Explorer"
 execute:
   warning: false
   cache: true
@@ -52,7 +52,7 @@ ctr_year_signature <- crossmap_collection$ctr_year_signature
 max_isic3_indegree <- crossmap_collection$max_isic3_indegree
 ```
 
-## Prep data for the diagram
+## Preparing the Diagram
 
 Many country-years share the exact same `isiccomb` crossmap structure
 (e.g. the same reporter using the same national classification variant
@@ -103,7 +103,7 @@ ojs_define(combo_edges = combo_edges)
 ojs_define(max_isic3_indegree = max_isic3_indegree)
 ```
 
-## Node-link diagram
+## Node-Link Diagram
 
 ```{ojs}
 //| label: nodelink-inputs

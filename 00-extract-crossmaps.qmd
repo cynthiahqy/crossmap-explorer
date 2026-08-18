@@ -1,5 +1,5 @@
 ---
-title: "extracting the isiccomb -> isic crossmap collection from INDSTAT"
+title: "Extracting the Crossmap Collection"
 execute:
   warning: false
   cache: true
@@ -41,7 +41,7 @@ library(xmap)
 library(testthat)
 ```
 
-## The legacy script
+## Legacy Script
 
 Treated as an opaque black box, exactly as in the vignette -- we recover
 its mapping logic by extraction rather than by reading it:
@@ -51,7 +51,7 @@ its mapping logic by extraction rather than by reading it:
 #| eval: true
 ```
 
-## Read the raw INDSTAT extract
+## Raw Extract
 
 ```{r}
 #| file: R/load.R
@@ -66,7 +66,7 @@ indstat_threefour <- subset_34_from_total(indstat_rev3, total_letter = "D")$thre
 indstat_threefour
 ```
 
-## Extract the naive weights
+## Naive-Weight Extraction
 
 Masking must preserve `NA`s -- an unconditional mask would turn
 originally-missing cells into "recorded" ones, breaking
@@ -85,7 +85,7 @@ links_isiccomb_isic <- extract_naive_weights(indstat_threefour)
 links_isiccomb_isic
 ```
 
-## Validate, per country-year
+## Validation
 
 A crossmap collection is many small crossmaps stacked in one table, so
 validity has to be checked *within* each `(country, year)` group, not
@@ -97,7 +97,7 @@ diagnoses_isiccomb_isic <- diagnose_grouped_xmap(links_isiccomb_isic, isiccomb, 
 diagnoses_isiccomb_isic |> count(valid)
 ```
 
-## Derive the collection's summary artifacts
+## Summary Artifacts
 
 The deterministic hierarchical map `isic -> isic.3` (weight always `1`;
 kept separate from the split map above so a future
@@ -263,7 +263,7 @@ max_isic3_indegree <- combo_edges |>
 max_isic3_indegree
 ```
 
-## Compose isiccomb -> isic.3 (component (d))
+## Composing isiccomb -> isic.3 (d)
 
 [xmap#29](https://github.com/cynthiahqy/xmap/issues/29) shipped
 `xmap::compose_xmap()`, so the two crossmaps above -- the split
@@ -306,7 +306,7 @@ deduplicated global overview: distinct
 (non-splitting, non-aggregating) codes and showing only the codes that
 cross an `isic.3` boundary.
 
-## Save the collection
+## Saving the Collection
 
 ```{r}
 dir.create(here("data", "interim"), showWarnings = FALSE, recursive = TRUE)

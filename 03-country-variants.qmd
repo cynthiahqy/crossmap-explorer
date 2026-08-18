@@ -1,5 +1,5 @@
 ---
-title: "country variants: all the crossmaps one country has used, over time"
+title: "Country Variants"
 execute:
   warning: false
   cache: true
@@ -39,7 +39,7 @@ max_isic3_indegree <- crossmap_collection$max_isic3_indegree
 ctr_year_signature <- crossmap_collection$ctr_year_signature
 ```
 
-## Prep data
+## Preparing the Data
 
 ```{r}
 ## countries with at least one isiccomb-reporting year
@@ -83,7 +83,7 @@ ojs_define(combo_edges = combo_edges)
 ojs_define(max_isic3_indegree = max_isic3_indegree)
 ```
 
-## Variants over time
+## Variants Over Time
 
 ```{ojs}
 //| label: country-inputs
