@@ -81,6 +81,12 @@ country-year attribution as `crossmap_group_list`'s `detail` field in
 [Explorer](02-crossmap-explorer.qmd), computed here per `isiccomb` instead
 of per identical-crossmap group:
 
+`coverage_summary` caps the always-visible subtitle at the top 3
+countries by years reported (`+N more` beyond that) -- codes reported by
+dozens of countries (e.g. `1810A`, 45 countries) would otherwise produce
+a ~1300-character subtitle wrapping across a whole small multiple.
+`coverage_detail` (full, untruncated) is kept for the hover tooltip.
+
 ```{r}
 composed_code_coverage <- composed_isiccomb_isic3 |>
   distinct(country, year, isiccomb) |>
@@ -94,6 +100,13 @@ composed_code_coverage <- composed_isiccomb_isic3 |>
     n_country = n_distinct(country),
     n_ctryr = sum(n_yr),
     coverage_detail = paste(paste0(name, " (", country, "): ", year_range), collapse = "; "),
+    coverage_summary = {
+      entries <- paste0(name, " (", country, "): ", year_range)
+      shown <- entries[seq_len(min(3, length(entries)))]
+      n_more <- length(entries) - length(shown)
+      if (n_more > 0) paste0(paste(shown, collapse = "; "), "; +", n_more, " more")
+      else paste(shown, collapse = "; ")
+    },
     .groups = "drop"
   )
 
@@ -128,9 +141,10 @@ codeGroups = d3.sort(
 nodeLinkOverview = html`<div style="display:flex; flex-wrap:wrap; gap:1rem; align-items:flex-start;">
   ${codeGroups.map(([isiccombCode, rows]) => {
     const cov = coverage.get(isiccombCode);
-    return html`<div style="border:1px solid #ddd; border-radius:6px; padding:0.5rem;" title="${cov.coverage_detail}">
+    const countLabel = `${cov.n_country} countr${cov.n_country === 1 ? "y" : "ies"}, ${cov.n_ctryr} country-yr${cov.n_ctryr === 1 ? "" : "s"}`;
+    return html`<div style="border:1px solid #ddd; border-radius:6px; padding:0.5rem;" title="${countLabel}\n${cov.coverage_detail}">
       <div style="font: 600 12px sans-serif; margin-bottom:2px;">${isiccombCode} (${rows.length} isic.3 parents)</div>
-      <div style="font: 10px sans-serif; color:#666; margin-bottom:4px;">${cov.n_country} countr${cov.n_country === 1 ? "y" : "ies"}, ${cov.n_ctryr} country-yr${cov.n_ctryr === 1 ? "" : "s"} (hover for detail)</div>
+      <div style="font: 10px sans-serif; color:#666; margin-bottom:4px;">${cov.coverage_summary}</div>
       ${buildComposedNodeLink2Col(d3, rows)}
     </div>`;
   })}
