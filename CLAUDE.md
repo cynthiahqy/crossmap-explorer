@@ -58,12 +58,14 @@ build output.
 
 ## Status
 
-Scaffolded and working end-to-end for components (a)/(a2)/(b)/(c)/(c'). Component
-(d) is a placeholder page (`index.qmd`) -- **blocked on
-`xmap::compose_xmap()`** ([xmap#29](https://github.com/cynthiahqy/xmap/issues/29),
-open/in progress, actively being designed by the package author). Do not
-hand-roll a bundling/composition substitute for (d) -- see that section
-below for why, and what to do once the function ships.
+Scaffolded and working end-to-end for all five components, (a)/(a2)/(b)/(c)/(c')/(d).
+`xmap::compose_xmap()` shipped ([xmap#29](https://github.com/cynthiahqy/xmap/issues/29),
+merged via xmap#30) and `04-composed-overview.qmd` is built against it --
+see that section below for how the composed collection is derived and
+visualised.
+No visual click-through of (d) has been done yet (no headless browser was
+available while building it, same limitation noted for (c) below);
+budget a `quarto preview` pass before treating it as fully validated.
 
 ```
 00-extract-crossmaps.qmd    # extraction notebook -- run this first (or
@@ -77,19 +79,22 @@ R/
                      # shown inline in 00-extract-crossmaps.qmd via
                      # #| file: chunks (vignette-style: readers see the
                      # real code, not a source() call hiding it)
-  extract.R         # extract_naive_weights(), diagnose_grouped_xmap()
+  extract.R         # extract_naive_weights(), diagnose_grouped_xmap(),
+                     # compose_grouped_xmap()
   prep.R            # collapse_years(), compute_ctr_year_signature() --
                      # the latter runs once in 00; collapse_years() is
                      # re-sourced in 02/03 since it's used interactively
                      # there too (grouping crossmap_collection's
                      # ctr_year_signature differently per page)
-index.qmd            # (d) -- placeholder, blocked on xmap#29
+index.qmd            # landing page, links to every page below
 01-coverage-tiles.qmd       # (a) + (b)
 02-crossmap-explorer.qmd    # (c): pick any country-year, deduplicated
                              # globally across all countries
 03-country-variants.qmd     # (c'): pick a country, see every distinct
                              # crossmap variant it used across its years
                              # (e.g. all 3 crossmaps DEU has had)
+04-composed-overview.qmd    # (d): whole-classification isiccomb -> isic.3
+                             # overview, built on composed_isiccomb_isic3
 data/
   raw/REV_3/14-Output.csv                        # real INDSTAT extract (copied)
   external/country_codes/INDSTAT_countries_REV3.csv
@@ -226,40 +231,52 @@ tooling (a `FileAttachment`-based shared `.js` file would work but adds
 build complexity for two call sites). Worth revisiting if a third
 node-link page shows up.
 
-### (d) Composed overview: full `isiccomb -> isic.3` structure -- blocked, do not build ad hoc
+### (d) Composed overview: full `isiccomb -> isic.3` structure -- done
 
-**Do not implement a hand-rolled join-multiply-sum or bundling algorithm
-here.** This is exactly the function
-[`xmap::compose_xmap()`](https://github.com/cynthiahqy/xmap/issues/29) is
-being built to do -- composing `isiccomb -> isic` and `isic -> isic.3`
+Built on [`xmap::compose_xmap()`](https://github.com/cynthiahqy/xmap/issues/29)
+(shipped via xmap#30) -- composes `isiccomb -> isic` and `isic -> isic.3`
 through their shared intermediate (`isic`) via
 `w(from, to) = sum over intermediate of w1(from, intermediate) * w2(intermediate, to)`,
-*without* materialising the intermediate `isic`-level values (which, per
-the issue, aren't meaningful on their own in this case -- they're an
-artifact of the naive split). Reimplementing that now would (a) duplicate
-work actively in progress upstream, and (b) need throwing away and
-re-plumbing once the real function ships with its own validity semantics
-(the issue notes composition needs its own diagnosis, e.g. flagging when
-`xmap2` doesn't fully cover `xmap1`'s targets -- a hand-rolled version here
-would not get that for free).
+*without* materialising the intermediate `isic`-level values (which aren't
+meaningful on their own in this case -- they're an artifact of the naive
+split). This deliberately waited on the real function rather than
+hand-rolling a join-multiply-sum substitute, so it inherits
+`compose_xmap()`'s own validity semantics (it re-checks both inputs are
+valid crossmaps and hard-aborts if `xmap1`'s `.to` isn't fully covered by
+`xmap2`'s `.from`) for free.
 
-Once `compose_xmap()` ships, add a step to `00-extract-crossmaps.qmd`'s
-"Derive the collection's summary artifacts" section and save the result
-into `crossmap_collection`:
+`compose_grouped_xmap()` (`R/extract.R`) wraps it for this dataset:
+`xmap::compose_xmap()` only takes one `xmap1`/`xmap2` pair at a time, and
+grouping is left to the caller (per xmap#29's resolution) -- exactly the
+same `dplyr::group_map()`-over-`(country, year)` pattern already used for
+`diagnose_grouped_xmap()`. `00-extract-crossmaps.qmd`'s "Compose isiccomb
+-> isic.3" section runs this once against every `(country, year)` group
+in `links_isiccomb_isic`, sharing one `xmap2` (`links_isic_isic3` as an
+`xmap_tbl`), and saves `composed_isiccomb_isic3` into `crossmap_collection`.
 
-```r
-composed_isiccomb_isic3 <- compose_xmap(links_isiccomb_isic, links_isic_isic3)
-```
+**Empirical finding, confirmed in that section**: every `isiccomb` code
+composes identically in *every* country-year that reports it -- no code
+has more than one distinct `(isic3, weight)` signature anywhere in the
+dataset. So `04-composed-overview.qmd`'s "bundle one-to-one edges, show only many-to-one
+components" reduction really is just `composed_isiccomb_isic3 |>
+distinct(isiccomb, isic3, weight) |> filter` on isiccomb-level
+`isic3`-count > 1 -- no separate graph-reduction algorithm needed, exactly
+as anticipated while this was still blocked. 179 of 306 codes (58%) cross
+an `isic.3` boundary, matching `comb_code_span`'s independently-computed
+figure in `00-extract-crossmaps.qmd`; `281I` composes to 25 `isic.3`
+parents at weight `0.04` each (matches `xmap#29`'s own worked example
+pattern, `151A -> {151..155}` at `w=0.2` each).
 
-Then `index.qmd` becomes: the composed crossmap's `(from, to, weight)`
-already *is* the deduplicated global structure -- "bundle one-to-one edges,
-show only many-to-one components" becomes a filter on in-degree/out-degree
-over `composed_isiccomb_isic3`, not a separate graph-reduction step to
-design. Re-read `xmap#29`'s worked example (`151A -> {151, 152, 153, 154,
-155}` at `w=0.2` each) before wiring up the visual -- the composed weights
-are already the exact split fractions the node-link diagram in (c) computes
-per-edge today; (d) is that same information at the whole-classification
-level.
+The visual is a simplified 2-column version of (c)/(c')'s node-link
+diagram (`isiccomb -> isic.3` directly, no `isic` middle column, since
+that's exactly what composing away the intermediate buys you) -- shown as
+one static small-multiples grid of all 179 crossing codes (no
+country-year picker, since (d) is whole-classification, not per-reporter).
+Target-node shading uses a fixed `[0, 1]` domain on the composed weight
+itself (fraction of the source code's value landing at that `isic.3`
+parent), not `max_isic3_indegree` -- that stat measures a different thing
+(max `isic`-children-per-`isic.3`-parent at the 4-digit level) and doesn't
+directly apply once the `isic` layer is composed away.
 
 ## Architecture
 
@@ -336,12 +353,11 @@ level.
 
 ## Suggested next steps
 
-1. `quarto preview` + click through (c) for real -- confirm the node-link
-   layout reads well at the scale of e.g. the 25-parent `281I` code,
-   check label crowding in the middle (`isic`) column.
-2. Watch [xmap#29](https://github.com/cynthiahqy/xmap/issues/29); when
-   `compose_xmap()` merges, build (d) per the plan above.
-3. Consider whether (a)/(b)'s tiles need a country-name axis label or
+1. `quarto preview` + click through (c) *and* (d) for real -- confirm the
+   node-link layout reads well at the scale of e.g. the 25-parent `281I`
+   code, check label crowding in the middle (`isic`) column of (c) and in
+   (d)'s 179-code small-multiples grid.
+2. Consider whether (a)/(b)'s tiles need a country-name axis label or
    tooltip (currently `axis.text.y = element_blank()` since ~150 country
    codes don't fit as tick labels) -- an OJS-interactive version with
    hover tooltips might read better than static ggplot at this row count.

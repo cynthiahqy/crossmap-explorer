@@ -9,7 +9,8 @@ execute:
 
 Component (c): zoom into a single country-year's crossmap collection.
 (Component (d), the whole-classification overview, is a separate page --
-see `index.qmd` -- blocked on `xmap::compose_xmap()`,
+see [Composed overview](04-composed-overview.qmd), built on
+`xmap::compose_xmap()`,
 [xmap#29](https://github.com/cynthiahqy/xmap/issues/29).)
 
 Node-link crossmap design from Huang (2023),

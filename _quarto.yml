@@ -17,6 +17,8 @@ website:
         text: Explorer
       - href: 03-country-variants.qmd
         text: Country variants
+      - href: 04-composed-overview.qmd
+        text: Composed overview
   sidebar:
     - contents: auto
 

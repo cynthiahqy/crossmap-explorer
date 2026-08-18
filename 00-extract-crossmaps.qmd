@@ -263,6 +263,49 @@ max_isic3_indegree <- combo_edges |>
 max_isic3_indegree
 ```
 
+## Compose isiccomb -> isic.3 (component (d))
+
+[xmap#29](https://github.com/cynthiahqy/xmap/issues/29) shipped
+`xmap::compose_xmap()`, so the two crossmaps above -- the split
+(`isiccomb -> isic`) and the deterministic aggregation (`isic -> isic.3`) --
+can now be chained through their shared `isic` intermediate directly,
+instead of the placeholder page that used to wait on it:
+
+```{r}
+xmap2_isic_isic3 <- links_isic_isic3 |>
+  as_xmap_tbl(isic, isic3, weight_by = weight)
+
+composed_isiccomb_isic3 <- compose_grouped_xmap(
+  links_isiccomb_isic, xmap2_isic_isic3, isiccomb, isic, weight
+)
+
+composed_isiccomb_isic3
+```
+
+Every `isiccomb` code turns out to have exactly one composed
+`(isic3, weight)` signature *everywhere* it's reported -- i.e. no code
+splits differently in one country-year than another -- so the composed
+collection dedups down to the whole-classification structure with no
+extra reconciliation step, exactly as anticipated when (d) was still
+blocked:
+
+```{r}
+composed_isiccomb_isic3 |>
+  dplyr::distinct(country, year, isiccomb, isic3, weight) |>
+  dplyr::arrange(isiccomb, isic3) |>
+  dplyr::group_by(isiccomb) |>
+  dplyr::summarise(sig = paste(isic3, round(weight, 6), sep = "=", collapse = ";"), .groups = "drop") |>
+  dplyr::group_by(isiccomb) |>
+  dplyr::summarise(n_variants = dplyr::n_distinct(sig), .groups = "drop") |>
+  dplyr::count(n_variants)
+```
+
+[Composed overview](04-composed-overview.qmd) uses this to build the
+deduplicated global overview: distinct
+`(isiccomb, isic3, weight)` triples, bundling away one-to-one
+(non-splitting, non-aggregating) codes and showing only the codes that
+cross an `isic.3` boundary.
+
 ## Save the collection
 
 ```{r}
@@ -280,7 +323,8 @@ crossmap_collection <- list(
   comb_group_span = comb_group_span,
   comb_code_span = comb_code_span,
   ctr_year_signature = ctr_year_signature,
-  max_isic3_indegree = max_isic3_indegree
+  max_isic3_indegree = max_isic3_indegree,
+  composed_isiccomb_isic3 = composed_isiccomb_isic3
 )
 
 saveRDS(crossmap_collection, here("data", "interim", "crossmap_collection.rds"))
