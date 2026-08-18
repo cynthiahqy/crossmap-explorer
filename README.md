@@ -4,6 +4,9 @@ Demo site illustrating the exploratory power of
 [crossmaps](https://github.com/cynthiahqy/xmap), using INDSTAT Rev.3's
 `isiccomb` combination-code splitting as a case study.
 
+Live site: https://cynthiahqy.github.io/crossmap-explorer/ (published via
+GitHub Pages, `.github/workflows/publish.yml`, on every push to `main`)
+
 See `CLAUDE.md` for the full architecture writeup and status.
 
 ## Setup
