@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>extracting the isiccomb -&gt; isic crossmap collection from INDSTAT – crossmap explorer</title>
+<title>Extracting the Crossmap Collection – Crossmap Explorer</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -120,7 +120,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="./index.html">
-    <span class="navbar-title">crossmap explorer</span>
+    <span class="navbar-title">Crossmap Explorer</span>
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
@@ -147,11 +147,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./03-country-variants.html"> 
-<span class="menu-text">Country variants</span></a>
+<span class="menu-text">Country Variants</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./04-composed-overview.html"> 
-<span class="menu-text">Composed overview</span></a>
+<span class="menu-text">Composed Overview</span></a>
   </li>  
 </ul>
           </div> <!-- /navcollapse -->
@@ -164,7 +164,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./00-extract-crossmaps.html">extracting the isiccomb -&gt; isic crossmap collection from INDSTAT</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./00-extract-crossmaps.html">Extracting the Crossmap Collection</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -179,31 +179,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./00-extract-crossmaps.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">extracting the isiccomb -&gt; isic crossmap collection from INDSTAT</span></a>
+ <span class="menu-text">Extracting the Crossmap Collection</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./01-coverage-tiles.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">coverage: which country-years rely on a split?</span></a>
+ <span class="menu-text">Split Coverage</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./02-crossmap-explorer.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">crossmap explorer: isiccomb splits + isic.3 aggregation, per country-year</span></a>
+ <span class="menu-text">Country-Year Explorer</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./03-country-variants.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">country variants: all the crossmaps one country has used, over time</span></a>
+ <span class="menu-text">Country Variants</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./04-composed-overview.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">composed overview: whole-classification isiccomb -&gt; isic.3 structure</span></a>
+ <span class="menu-text">Composed Overview</span></a>
   </div>
 </li>
     </ul>
@@ -218,13 +218,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#motivation" id="toc-motivation" class="nav-link active" data-scroll-target="#motivation">Motivation</a></li>
   <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup">Setup</a></li>
-  <li><a href="#the-legacy-script" id="toc-the-legacy-script" class="nav-link" data-scroll-target="#the-legacy-script">The legacy script</a></li>
-  <li><a href="#read-the-raw-indstat-extract" id="toc-read-the-raw-indstat-extract" class="nav-link" data-scroll-target="#read-the-raw-indstat-extract">Read the raw INDSTAT extract</a></li>
-  <li><a href="#extract-the-naive-weights" id="toc-extract-the-naive-weights" class="nav-link" data-scroll-target="#extract-the-naive-weights">Extract the naive weights</a></li>
-  <li><a href="#validate-per-country-year" id="toc-validate-per-country-year" class="nav-link" data-scroll-target="#validate-per-country-year">Validate, per country-year</a></li>
-  <li><a href="#derive-the-collections-summary-artifacts" id="toc-derive-the-collections-summary-artifacts" class="nav-link" data-scroll-target="#derive-the-collections-summary-artifacts">Derive the collection’s summary artifacts</a></li>
-  <li><a href="#compose-isiccomb---isic.3-component-d" id="toc-compose-isiccomb---isic.3-component-d" class="nav-link" data-scroll-target="#compose-isiccomb---isic.3-component-d">Compose isiccomb -&gt; isic.3 (component (d))</a></li>
-  <li><a href="#save-the-collection" id="toc-save-the-collection" class="nav-link" data-scroll-target="#save-the-collection">Save the collection</a></li>
+  <li><a href="#legacy-script" id="toc-legacy-script" class="nav-link" data-scroll-target="#legacy-script">Legacy Script</a></li>
+  <li><a href="#raw-extract" id="toc-raw-extract" class="nav-link" data-scroll-target="#raw-extract">Raw Extract</a></li>
+  <li><a href="#naive-weight-extraction" id="toc-naive-weight-extraction" class="nav-link" data-scroll-target="#naive-weight-extraction">Naive-Weight Extraction</a></li>
+  <li><a href="#validation" id="toc-validation" class="nav-link" data-scroll-target="#validation">Validation</a></li>
+  <li><a href="#summary-artifacts" id="toc-summary-artifacts" class="nav-link" data-scroll-target="#summary-artifacts">Summary Artifacts</a></li>
+  <li><a href="#composing-isiccomb---isic.3-d" id="toc-composing-isiccomb---isic.3-d" class="nav-link" data-scroll-target="#composing-isiccomb---isic.3-d">Composing isiccomb -&gt; isic.3 (d)</a></li>
+  <li><a href="#saving-the-collection" id="toc-saving-the-collection" class="nav-link" data-scroll-target="#saving-the-collection">Saving the Collection</a></li>
   </ul>
 </nav>
     </div>
@@ -233,7 +233,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">extracting the isiccomb -&gt; isic crossmap collection from INDSTAT</h1>
+<h1 class="title">Extracting the Crossmap Collection</h1>
 </div>
 
 
@@ -268,8 +268,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </details>
 </div>
 </section>
-<section id="the-legacy-script" class="level2">
-<h2 class="anchored" data-anchor-id="the-legacy-script">The legacy script</h2>
+<section id="legacy-script" class="level2">
+<h2 class="anchored" data-anchor-id="legacy-script">Legacy Script</h2>
 <p>Treated as an opaque black box, exactly as in the vignette – we recover its mapping logic by extraction rather than by reading it:</p>
 <div class="cell">
 <details class="code-fold">
@@ -351,8 +351,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </details>
 </div>
 </section>
-<section id="read-the-raw-indstat-extract" class="level2">
-<h2 class="anchored" data-anchor-id="read-the-raw-indstat-extract">Read the raw INDSTAT extract</h2>
+<section id="raw-extract" class="level2">
+<h2 class="anchored" data-anchor-id="raw-extract">Raw Extract</h2>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -385,7 +385,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>indstat_threefour <span class="ot">&lt;-</span> <span class="fu">subset_34_from_total</span>(indstat_rev3, <span class="at">total_letter =</span> <span class="st">"D"</span>)<span class="sc">$</span>threefour</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Test passed with 1 success 😸.</code></pre>
+<pre><code>Test passed with 1 success 🎉.</code></pre>
 </div>
 <details class="code-fold">
 <summary>Code</summary>
@@ -409,8 +409,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="extract-the-naive-weights" class="level2">
-<h2 class="anchored" data-anchor-id="extract-the-naive-weights">Extract the naive weights</h2>
+<section id="naive-weight-extraction" class="level2">
+<h2 class="anchored" data-anchor-id="naive-weight-extraction">Naive-Weight Extraction</h2>
 <p>Masking must preserve <code>NA</code>s – an unconditional mask would turn originally-missing cells into “recorded” ones, breaking <code>split_isiccomb()</code>’s own internal invariant check (exactly one recorded value per <code>isiccomb</code> group). See the comment in <code>R/extract.R</code>; this was a real bug caught while building this page, not a theoretical concern.</p>
 <div class="cell">
 <details class="code-fold">
@@ -471,7 +471,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>links_isiccomb_isic <span class="ot">&lt;-</span> <span class="fu">extract_naive_weights</span>(indstat_threefour)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Test passed with 1 success 🎉.
+<pre><code>Test passed with 1 success 🥇.
 Test passed with 1 success 😸.</code></pre>
 </div>
 <details class="code-fold">
@@ -496,8 +496,8 @@ Test passed with 1 success 😸.</code></pre>
 </div>
 </div>
 </section>
-<section id="validate-per-country-year" class="level2">
-<h2 class="anchored" data-anchor-id="validate-per-country-year">Validate, per country-year</h2>
+<section id="validation" class="level2">
+<h2 class="anchored" data-anchor-id="validation">Validation</h2>
 <p>A crossmap collection is many small crossmaps stacked in one table, so validity has to be checked <em>within</em> each <code>(country, year)</code> group, not across the whole table at once:</p>
 <div class="cell">
 <details class="code-fold">
@@ -514,8 +514,8 @@ Test passed with 1 success 😸.</code></pre>
 </div>
 </div>
 </section>
-<section id="derive-the-collections-summary-artifacts" class="level2">
-<h2 class="anchored" data-anchor-id="derive-the-collections-summary-artifacts">Derive the collection’s summary artifacts</h2>
+<section id="summary-artifacts" class="level2">
+<h2 class="anchored" data-anchor-id="summary-artifacts">Summary Artifacts</h2>
 <p>The deterministic hierarchical map <code>isic -&gt; isic.3</code> (weight always <code>1</code>; kept separate from the split map above so a future <code>xmap::compose_xmap()</code> – <a href="https://github.com/cynthiahqy/xmap/issues/29">xmap#29</a> – can chain the two without this page needing to change):</p>
 <div class="cell">
 <details class="code-fold">
@@ -761,8 +761,8 @@ Test passed with 1 success 😸.</code></pre>
 </div>
 </div>
 </section>
-<section id="compose-isiccomb---isic.3-component-d" class="level2">
-<h2 class="anchored" data-anchor-id="compose-isiccomb---isic.3-component-d">Compose isiccomb -&gt; isic.3 (component (d))</h2>
+<section id="composing-isiccomb---isic.3-d" class="level2">
+<h2 class="anchored" data-anchor-id="composing-isiccomb---isic.3-d">Composing isiccomb -&gt; isic.3 (d)</h2>
 <p><a href="https://github.com/cynthiahqy/xmap/issues/29">xmap#29</a> shipped <code>xmap::compose_xmap()</code>, so the two crossmaps above – the split (<code>isiccomb -&gt; isic</code>) and the deterministic aggregation (<code>isic -&gt; isic.3</code>) – can now be chained through their shared <code>isic</code> intermediate directly, instead of the placeholder page that used to wait on it:</p>
 <div class="cell">
 <details class="code-fold">
@@ -815,8 +815,8 @@ Test passed with 1 success 😸.</code></pre>
 </div>
 <p><a href="./04-composed-overview.html">Composed overview</a> uses this to build the deduplicated global overview: distinct <code>(isiccomb, isic3, weight)</code> triples, bundling away one-to-one (non-splitting, non-aggregating) codes and showing only the codes that cross an <code>isic.3</code> boundary.</p>
 </section>
-<section id="save-the-collection" class="level2">
-<h2 class="anchored" data-anchor-id="save-the-collection">Save the collection</h2>
+<section id="saving-the-collection" class="level2">
+<h2 class="anchored" data-anchor-id="saving-the-collection">Saving the Collection</h2>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>

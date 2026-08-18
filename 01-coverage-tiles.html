@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>coverage: which country-years rely on a split? – crossmap explorer</title>
+<title>Split Coverage – Crossmap Explorer</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -120,7 +120,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="./index.html">
-    <span class="navbar-title">crossmap explorer</span>
+    <span class="navbar-title">Crossmap Explorer</span>
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
@@ -147,11 +147,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./03-country-variants.html"> 
-<span class="menu-text">Country variants</span></a>
+<span class="menu-text">Country Variants</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./04-composed-overview.html"> 
-<span class="menu-text">Composed overview</span></a>
+<span class="menu-text">Composed Overview</span></a>
   </li>  
 </ul>
           </div> <!-- /navcollapse -->
@@ -164,7 +164,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01-coverage-tiles.html">coverage: which country-years rely on a split?</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01-coverage-tiles.html">Split Coverage</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -179,31 +179,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./00-extract-crossmaps.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">extracting the isiccomb -&gt; isic crossmap collection from INDSTAT</span></a>
+ <span class="menu-text">Extracting the Crossmap Collection</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./01-coverage-tiles.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">coverage: which country-years rely on a split?</span></a>
+ <span class="menu-text">Split Coverage</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./02-crossmap-explorer.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">crossmap explorer: isiccomb splits + isic.3 aggregation, per country-year</span></a>
+ <span class="menu-text">Country-Year Explorer</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./03-country-variants.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">country variants: all the crossmaps one country has used, over time</span></a>
+ <span class="menu-text">Country Variants</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./04-composed-overview.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">composed overview: whole-classification isiccomb -&gt; isic.3 structure</span></a>
+ <span class="menu-text">Composed Overview</span></a>
   </div>
 </li>
     </ul>
@@ -218,13 +218,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#motivation" id="toc-motivation" class="nav-link active" data-scroll-target="#motivation">Motivation</a></li>
   <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup">Setup</a></li>
-  <li><a href="#stage-1-split-coverage-isiccomb---isic-only" id="toc-stage-1-split-coverage-isiccomb---isic-only" class="nav-link" data-scroll-target="#stage-1-split-coverage-isiccomb---isic-only">Stage 1: split coverage (isiccomb -&gt; isic only)</a>
+  <li><a href="#stage-1-split-coverage-isiccomb---isic" id="toc-stage-1-split-coverage-isiccomb---isic" class="nav-link" data-scroll-target="#stage-1-split-coverage-isiccomb---isic">Stage 1: Split Coverage (isiccomb -&gt; isic)</a>
   <ul class="collapse">
-  <li><a href="#binary-does-this-country-year-have-any-isiccomb-split-at-all" id="toc-binary-does-this-country-year-have-any-isiccomb-split-at-all" class="nav-link" data-scroll-target="#binary-does-this-country-year-have-any-isiccomb-split-at-all">Binary: does this country-year have any isiccomb split at all?</a></li>
-  <li><a href="#continuous-what-fraction-of-reported-isic-values-came-from-a-split" id="toc-continuous-what-fraction-of-reported-isic-values-came-from-a-split" class="nav-link" data-scroll-target="#continuous-what-fraction-of-reported-isic-values-came-from-a-split">Continuous: what fraction of reported isic values came from a split?</a></li>
+  <li><a href="#any-split" id="toc-any-split" class="nav-link" data-scroll-target="#any-split">Any Split?</a></li>
+  <li><a href="#fraction-split" id="toc-fraction-split" class="nav-link" data-scroll-target="#fraction-split">Fraction Split</a></li>
   </ul></li>
-  <li><a href="#stage-12-does-the-transformation-actually-cross-an-isic.3-boundary" id="toc-stage-12-does-the-transformation-actually-cross-an-isic.3-boundary" class="nav-link" data-scroll-target="#stage-12-does-the-transformation-actually-cross-an-isic.3-boundary">Stage 1+2: does the transformation actually cross an isic.3 boundary?</a></li>
-  <li><a href="#which-countries-does-frac_split-overstate-the-most" id="toc-which-countries-does-frac_split-overstate-the-most" class="nav-link" data-scroll-target="#which-countries-does-frac_split-overstate-the-most">Which countries does frac_split overstate the most?</a></li>
+  <li><a href="#stage-12-crossing-isic.3" id="toc-stage-12-crossing-isic.3" class="nav-link" data-scroll-target="#stage-12-crossing-isic.3">Stage 1+2: Crossing isic.3</a></li>
+  <li><a href="#biggest-overstatements" id="toc-biggest-overstatements" class="nav-link" data-scroll-target="#biggest-overstatements">Biggest Overstatements</a></li>
   </ul>
 </nav>
     </div>
@@ -233,7 +233,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">coverage: which country-years rely on a split?</h1>
+<h1 class="title">Split Coverage</h1>
 </div>
 
 
@@ -291,11 +291,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </details>
 </div>
 </section>
-<section id="stage-1-split-coverage-isiccomb---isic-only" class="level2">
-<h2 class="anchored" data-anchor-id="stage-1-split-coverage-isiccomb---isic-only">Stage 1: split coverage (isiccomb -&gt; isic only)</h2>
+<section id="stage-1-split-coverage-isiccomb---isic" class="level2">
+<h2 class="anchored" data-anchor-id="stage-1-split-coverage-isiccomb---isic">Stage 1: Split Coverage (isiccomb -&gt; isic)</h2>
 <p>Two views of the same underlying fact, at different resolutions: the binary tile is a strict coarsening of the continuous one (<code>any_split == (frac_split &gt; 0)</code>) – read them as a pair, binary for “where does this even come up,” continuous for “how much does it matter there.”</p>
-<section id="binary-does-this-country-year-have-any-isiccomb-split-at-all" class="level3">
-<h3 class="anchored" data-anchor-id="binary-does-this-country-year-have-any-isiccomb-split-at-all">Binary: does this country-year have any isiccomb split at all?</h3>
+<section id="any-split" class="level3">
+<h3 class="anchored" data-anchor-id="any-split">Any Split?</h3>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -323,8 +323,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="continuous-what-fraction-of-reported-isic-values-came-from-a-split" class="level3">
-<h3 class="anchored" data-anchor-id="continuous-what-fraction-of-reported-isic-values-came-from-a-split">Continuous: what fraction of reported isic values came from a split?</h3>
+<section id="fraction-split" class="level3">
+<h3 class="anchored" data-anchor-id="fraction-split">Fraction Split</h3>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -353,8 +353,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </section>
 </section>
-<section id="stage-12-does-the-transformation-actually-cross-an-isic.3-boundary" class="level2">
-<h2 class="anchored" data-anchor-id="stage-12-does-the-transformation-actually-cross-an-isic.3-boundary">Stage 1+2: does the transformation actually cross an isic.3 boundary?</h2>
+<section id="stage-12-crossing-isic.3" class="level2">
+<h2 class="anchored" data-anchor-id="stage-12-crossing-isic.3">Stage 1+2: Crossing isic.3</h2>
 <p><code>frac_split_crossing</code> shares <code>frac_split</code>’s denominator (fraction of a country-year’s <code>isic</code> values) but restricts the numerator to values whose combo group <em>crosses</em> an <code>isic.3</code> boundary – i.e.&nbsp;it’s the “consequential” subset of stage 1’s coverage, once the second stage is accounted for: <code>frac_split = frac_split_reconverging + frac_split_crossing</code>.</p>
 <div class="cell">
 <details class="code-fold">
@@ -413,8 +413,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="which-countries-does-frac_split-overstate-the-most" class="level2">
-<h2 class="anchored" data-anchor-id="which-countries-does-frac_split-overstate-the-most">Which countries does frac_split overstate the most?</h2>
+<section id="biggest-overstatements" class="level2">
+<h2 class="anchored" data-anchor-id="biggest-overstatements">Biggest Overstatements</h2>
 <p>Aggregating (all years pooled, volume-weighted – same approach as <code>country_order</code> above) down to one row per country makes it possible to ask directly: for which reporters is stage-1 <code>frac_split</code> mostly noise (reconvergent diamonds), and for which is it mostly signal (genuine crossing)? Restricted to countries with at least 5 split rows pooled across all their years, so a single small sample can’t produce a misleadingly clean 0% or 100%.</p>
 <div class="cell">
 <details class="code-fold">

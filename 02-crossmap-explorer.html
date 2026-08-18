@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>crossmap explorer: isiccomb splits + isic.3 aggregation, per country-year – crossmap explorer</title>
+<title>Country-Year Explorer – Crossmap Explorer</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -131,7 +131,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="./index.html">
-    <span class="navbar-title">crossmap explorer</span>
+    <span class="navbar-title">Crossmap Explorer</span>
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
@@ -158,11 +158,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./03-country-variants.html"> 
-<span class="menu-text">Country variants</span></a>
+<span class="menu-text">Country Variants</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./04-composed-overview.html"> 
-<span class="menu-text">Composed overview</span></a>
+<span class="menu-text">Composed Overview</span></a>
   </li>  
 </ul>
           </div> <!-- /navcollapse -->
@@ -175,7 +175,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./02-crossmap-explorer.html">crossmap explorer: isiccomb splits + isic.3 aggregation, per country-year</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./02-crossmap-explorer.html">Country-Year Explorer</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -190,31 +190,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./00-extract-crossmaps.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">extracting the isiccomb -&gt; isic crossmap collection from INDSTAT</span></a>
+ <span class="menu-text">Extracting the Crossmap Collection</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./01-coverage-tiles.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">coverage: which country-years rely on a split?</span></a>
+ <span class="menu-text">Split Coverage</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./02-crossmap-explorer.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">crossmap explorer: isiccomb splits + isic.3 aggregation, per country-year</span></a>
+ <span class="menu-text">Country-Year Explorer</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./03-country-variants.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">country variants: all the crossmaps one country has used, over time</span></a>
+ <span class="menu-text">Country Variants</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./04-composed-overview.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">composed overview: whole-classification isiccomb -&gt; isic.3 structure</span></a>
+ <span class="menu-text">Composed Overview</span></a>
   </div>
 </li>
     </ul>
@@ -229,8 +229,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#motivation" id="toc-motivation" class="nav-link active" data-scroll-target="#motivation">Motivation</a></li>
   <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup">Setup</a></li>
-  <li><a href="#prep-data-for-the-diagram" id="toc-prep-data-for-the-diagram" class="nav-link" data-scroll-target="#prep-data-for-the-diagram">Prep data for the diagram</a></li>
-  <li><a href="#node-link-diagram" id="toc-node-link-diagram" class="nav-link" data-scroll-target="#node-link-diagram">Node-link diagram</a></li>
+  <li><a href="#preparing-the-diagram" id="toc-preparing-the-diagram" class="nav-link" data-scroll-target="#preparing-the-diagram">Preparing the Diagram</a></li>
+  <li><a href="#node-link-diagram" id="toc-node-link-diagram" class="nav-link" data-scroll-target="#node-link-diagram">Node-Link Diagram</a></li>
   </ul>
 </nav>
     </div>
@@ -239,7 +239,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">crossmap explorer: isiccomb splits + isic.3 aggregation, per country-year</h1>
+<h1 class="title">Country-Year Explorer</h1>
 </div>
 
 
@@ -289,8 +289,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </details>
 </div>
 </section>
-<section id="prep-data-for-the-diagram" class="level2">
-<h2 class="anchored" data-anchor-id="prep-data-for-the-diagram">Prep data for the diagram</h2>
+<section id="preparing-the-diagram" class="level2">
+<h2 class="anchored" data-anchor-id="preparing-the-diagram">Preparing the Diagram</h2>
 <p>Many country-years share the exact same <code>isiccomb</code> crossmap structure (e.g.&nbsp;the same reporter using the same national classification variant for a run of consecutive years). Rendering one diagram per country-year would repeat identical figures dozens of times, so we first collapse country-years into groups that share an <em>identical</em> crossmap (same set of <code>isiccomb -&gt; isic</code> edges with the same weights) and show each distinct pattern only once, labelled with which country-years share it.</p>
 <p>This groups <em>across</em> countries – see <a href="./03-country-variants.html">Country variants</a> instead for “all the variants a single country used over time” (e.g.&nbsp;all the crossmaps DEU has had).</p>
 <div class="cell">
@@ -350,7 +350,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </section>
 <section id="node-link-diagram" class="level2">
-<h2 class="anchored" data-anchor-id="node-link-diagram">Node-link diagram</h2>
+<h2 class="anchored" data-anchor-id="node-link-diagram">Node-Link Diagram</h2>
 <div id="nodelink-inputs" class="cell">
 <details class="code-fold">
 <summary>Code</summary>
