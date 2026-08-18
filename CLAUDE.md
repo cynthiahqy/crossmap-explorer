@@ -58,6 +58,9 @@ build output.
 
 ## Status
 
+Live at https://cynthiahqy.github.io/crossmap-explorer/, published via
+`.github/workflows/publish.yml` on every push to `main`.
+
 Scaffolded and working end-to-end for all five components, (a)/(a2)/(b)/(c)/(c')/(d).
 `xmap::compose_xmap()` shipped ([xmap#29](https://github.com/cynthiahqy/xmap/issues/29),
 merged via xmap#30) and `04-composed-overview.qmd` is built against it --
