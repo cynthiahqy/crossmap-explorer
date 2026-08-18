@@ -294,6 +294,20 @@ parent), not `max_isic3_indegree` -- that stat measures a different thing
 (max `isic`-children-per-`isic.3`-parent at the 4-digit level) and doesn't
 directly apply once the `isic` layer is composed away.
 
+**Country/year attribution**: the `distinct(isiccomb, isic3, weight)`
+dedup above is lossless for structure, but it also erases which slice of
+the real dataset each small multiple reflects -- a code reported by one
+country in one year and a code reported by 50 country-years would
+otherwise look identical. `composed_code_coverage` (computed alongside
+`composed_crossing_edges`, before the `country`/`year` columns are
+dropped) reuses the same `collapse_years()`-based pattern as
+`crossmap_group_list`'s `detail` field in (c) -- per `isiccomb`, which
+countries reported it and their collapsed year ranges. Surfaced per card
+as a compact `n_country`/`n_ctryr` subtitle plus the full breakdown on
+hover. Confirmed against `combo_edges`: `281I` is a single-reporter
+artifact (Syria, code `760`, 2000-2002 and 2005 -- 1 country, 4
+country-years), matching independently on both sides.
+
 ## Architecture
 
 ### Tech stack

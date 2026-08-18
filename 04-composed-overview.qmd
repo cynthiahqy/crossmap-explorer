@@ -32,11 +32,13 @@ Reads the crossmap collection prepared by
 ```{r}
 library(tidyverse)
 library(here)
+source(here("R", "prep.R")) # collapse_years()
 ```
 
 ```{r}
 crossmap_collection <- readRDS(here("data", "interim", "crossmap_collection.rds"))
 composed_isiccomb_isic3 <- crossmap_collection$composed_isiccomb_isic3
+ctr_codes <- crossmap_collection$ctr_codes
 ```
 
 ## Prep data for the diagram
@@ -71,10 +73,38 @@ glue::glue(
 )
 ```
 
+Deduping away `country`/`year` above is lossless for the *structure* of each
+component, but it also erases which slice of the real dataset each small
+multiple actually reflects -- a code reported by one country in one year
+and a code reported by 50 country-years look identical otherwise. Same
+country-year attribution as `crossmap_group_list`'s `detail` field in
+[Explorer](02-crossmap-explorer.qmd), computed here per `isiccomb` instead
+of per identical-crossmap group:
+
+```{r}
+composed_code_coverage <- composed_isiccomb_isic3 |>
+  distinct(country, year, isiccomb) |>
+  semi_join(composed_crossing_edges, by = "isiccomb") |>
+  left_join(ctr_codes, by = c("country" = "code")) |>
+  group_by(isiccomb, country, name) |>
+  summarise(year_range = collapse_years(year), n_yr = n(), .groups = "drop") |>
+  arrange(isiccomb, desc(n_yr)) |>
+  group_by(isiccomb) |>
+  summarise(
+    n_country = n_distinct(country),
+    n_ctryr = sum(n_yr),
+    coverage_detail = paste(paste0(name, " (", country, "): ", year_range), collapse = "; "),
+    .groups = "drop"
+  )
+
+composed_code_coverage
+```
+
 ```{r}
 #| label: send-to-ojs
 #| cache: false
 ojs_define(composed_crossing_edges = composed_crossing_edges)
+ojs_define(composed_code_coverage = composed_code_coverage)
 ```
 
 ## Node-link overview
@@ -88,6 +118,7 @@ import { buildComposedNodeLink2Col } from "./js/node-link.js"
 ```{ojs}
 //| label: nodelink-diagram
 edges = transpose(composed_crossing_edges)
+coverage = new Map(transpose(composed_code_coverage).map(d => [d.isiccomb, d]))
 
 codeGroups = d3.sort(
   d3.groups(edges, d => d.isiccomb),
@@ -96,8 +127,10 @@ codeGroups = d3.sort(
 
 nodeLinkOverview = html`<div style="display:flex; flex-wrap:wrap; gap:1rem; align-items:flex-start;">
   ${codeGroups.map(([isiccombCode, rows]) => {
-    return html`<div style="border:1px solid #ddd; border-radius:6px; padding:0.5rem;">
-      <div style="font: 600 12px sans-serif; margin-bottom:4px;">${isiccombCode} (${rows.length} isic.3 parents)</div>
+    const cov = coverage.get(isiccombCode);
+    return html`<div style="border:1px solid #ddd; border-radius:6px; padding:0.5rem;" title="${cov.coverage_detail}">
+      <div style="font: 600 12px sans-serif; margin-bottom:2px;">${isiccombCode} (${rows.length} isic.3 parents)</div>
+      <div style="font: 10px sans-serif; color:#666; margin-bottom:4px;">${cov.n_country} countr${cov.n_country === 1 ? "y" : "ies"}, ${cov.n_ctryr} country-yr${cov.n_ctryr === 1 ? "" : "s"} (hover for detail)</div>
       ${buildComposedNodeLink2Col(d3, rows)}
     </div>`;
   })}
